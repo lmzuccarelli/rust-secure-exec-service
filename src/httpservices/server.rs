@@ -1,5 +1,5 @@
 use crate::api::schema::APIParameters;
-use crate::remote::process::remote_execute;
+use crate::command::process::{local_execute, remote_execute};
 use std::net::{Ipv4Addr, SocketAddr};
 use std::sync::Arc;
 use std::{env, fs, io};
@@ -14,11 +14,14 @@ use rustls::ServerConfig;
 use rustls_pki_types::{CertificateDer, PrivateKeyDer};
 use std::str;
 use tokio::net::TcpListener;
+use tokio::sync::Semaphore;
 use tokio_rustls::TlsAcceptor;
 
 fn error(err: String) -> io::Error {
     io::Error::new(io::ErrorKind::Other, err)
 }
+
+static PERMIT: Semaphore = Semaphore::const_new(1);
 
 pub async fn run_server() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     // First parameter is port number (optional, defaults to 1337)
@@ -77,15 +80,25 @@ async fn process(req: Request<Incoming>) -> Result<Response<Full<Bytes>>, hyper:
     match (req.method(), req.uri().path()) {
         // help route.
         (&Method::GET, "/") => {
-            *response.body_mut() = Full::from("Try POST /process\n");
+            *response.body_mut() = Full::from("use POST to '/process' endpoint\n");
         }
         // service route.
         (&Method::POST, "/process") => {
+            //let permit = PERMIT.acquire().await.unwrap();
             let req_data = req.into_body().collect().await?.to_bytes();
             let s = String::from_utf8(req_data.to_vec()).unwrap();
+            println!("{}", s);
             let api_params: APIParameters = serde_json::from_str(&s).unwrap();
-            remote_execute(api_params);
             *response.body_mut() = Full::from("process command sent please view console logs");
+            if api_params.node == "localhost" {
+                tokio::spawn(async move {
+                    local_execute(api_params).await;
+                });
+            } else {
+                tokio::spawn(async move {
+                    remote_execute(api_params).await;
+                });
+            }
         }
         // Catch-all 404.
         _ => {

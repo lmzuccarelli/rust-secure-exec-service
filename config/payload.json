@@ -1,5 +1,7 @@
 {
-	"command": "ls",
-	"node": "192.168.1.27:22",
-	"user": "lzuccarelli"
+	"command": "./scripts/delay.sh",
+	"node": "localhost",
+	"user": "lzuccarelli",
+	"callback": false,
+	"callbackUrl": "http://192.168.1.27:8000/release/notify"
 }

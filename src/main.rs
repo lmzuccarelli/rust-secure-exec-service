@@ -1,8 +1,8 @@
 use crate::httpservices::server::run_server;
 
 mod api;
+mod command;
 mod httpservices;
-mod remote;
 
 #[tokio::main]
 async fn main() {

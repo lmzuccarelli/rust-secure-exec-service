@@ -3,9 +3,13 @@ use crate::httpservices::client::fetch_url;
 use ssh2::Session;
 use std::fs::File;
 use std::io::prelude::*;
+use std::io::BufRead;
+use std::io::BufReader;
 use std::net::TcpStream;
 use std::path::Path;
+use std::process::{Command, Stdio};
 use std::str::FromStr;
+//use tokio::sync::Semaphore;
 
 pub async fn remote_execute(api_params: APIParameters) {
     // connect to the local SSH server
@@ -67,4 +71,24 @@ pub async fn remote_upload(node: String, file: String) {
     remote_file.wait_eof().unwrap();
     remote_file.close().unwrap();
     remote_file.wait_close().unwrap();
+}
+
+pub async fn local_execute(api_params: APIParameters) {
+    let cmd = Command::new(api_params.command)
+        .stdout(Stdio::piped())
+        .spawn()
+        .expect("command failed");
+    let mut out = cmd.stdout.unwrap();
+    let mut reader = BufReader::new(&mut out);
+
+    loop {
+        let mut line = String::new();
+        let num_bytes = reader.read_line(&mut line).unwrap();
+        if num_bytes == 0 {
+            println!("End of stream.");
+            break;
+        }
+        println!("The line: {:?}", line);
+    }
+    println!("Done.");
 }
