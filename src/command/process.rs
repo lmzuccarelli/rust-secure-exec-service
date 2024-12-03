@@ -90,5 +90,10 @@ pub async fn local_execute(api_params: APIParameters) {
         }
         println!("The line: {:?}", line);
     }
+    if api_params.callback {
+        let url_str = api_params.callback_url.unwrap();
+        let uri = hyper::Uri::from_str(&url_str).unwrap();
+        let _res = fetch_url(uri).await;
+    }
     println!("Done.");
 }
