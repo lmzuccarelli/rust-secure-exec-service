@@ -1,9 +1,5 @@
 use crate::api::schema::APIParameters;
 use crate::command::process::{local_execute, remote_execute};
-use std::net::{Ipv4Addr, SocketAddr};
-use std::sync::Arc;
-use std::{env, fs, io};
-
 use http::{Method, Request, Response, StatusCode};
 use http_body_util::{BodyExt, Full};
 use hyper::body::{Bytes, Incoming};
@@ -12,16 +8,17 @@ use hyper_util::rt::{TokioExecutor, TokioIo};
 use hyper_util::server::conn::auto::Builder;
 use rustls::ServerConfig;
 use rustls_pki_types::{CertificateDer, PrivateKeyDer};
+use std::net::{Ipv4Addr, SocketAddr};
+use std::path::Path;
 use std::str;
+use std::sync::Arc;
+use std::{env, fs, io};
 use tokio::net::TcpListener;
-use tokio::sync::Semaphore;
 use tokio_rustls::TlsAcceptor;
 
 fn error(err: String) -> io::Error {
     io::Error::new(io::ErrorKind::Other, err)
 }
-
-static PERMIT: Semaphore = Semaphore::const_new(1);
 
 pub async fn run_server() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     // First parameter is port number (optional, defaults to 1337)
@@ -84,20 +81,25 @@ async fn process(req: Request<Incoming>) -> Result<Response<Full<Bytes>>, hyper:
         }
         // service route.
         (&Method::POST, "/process") => {
-            //let permit = PERMIT.acquire().await.unwrap();
-            let req_data = req.into_body().collect().await?.to_bytes();
-            let s = String::from_utf8(req_data.to_vec()).unwrap();
-            println!("{}", s);
-            let api_params: APIParameters = serde_json::from_str(&s).unwrap();
-            *response.body_mut() = Full::from("process command sent please view console logs");
-            if api_params.node == "localhost" {
-                tokio::spawn(async move {
-                    local_execute(api_params).await;
-                });
+            // simple file based semaphore - dropped when callback is completed
+            if Path::new("semaphore.pid").exists() {
+                *response.body_mut() = Full::from("process has not completed yet");
             } else {
-                tokio::spawn(async move {
-                    remote_execute(api_params).await;
-                });
+                // acquire
+                fs::write("semaphore.pid", "process").expect("should write semaphore");
+                let req_data = req.into_body().collect().await?.to_bytes();
+                let s = String::from_utf8(req_data.to_vec()).unwrap();
+                let api_params: APIParameters = serde_json::from_str(&s).unwrap();
+                *response.body_mut() = Full::from("process command sent please view console logs");
+                if api_params.node == "localhost" {
+                    tokio::spawn(async move {
+                        local_execute(api_params).await;
+                    });
+                } else {
+                    tokio::spawn(async move {
+                        remote_execute(api_params).await;
+                    });
+                }
             }
         }
         // Catch-all 404.

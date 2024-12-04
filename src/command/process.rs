@@ -1,6 +1,7 @@
 use crate::api::schema::APIParameters;
 use crate::httpservices::client::fetch_url;
 use ssh2::Session;
+use std::fs;
 use std::fs::File;
 use std::io::prelude::*;
 use std::io::BufRead;
@@ -9,7 +10,6 @@ use std::net::TcpStream;
 use std::path::Path;
 use std::process::{Command, Stdio};
 use std::str::FromStr;
-//use tokio::sync::Semaphore;
 
 pub async fn remote_execute(api_params: APIParameters) {
     // connect to the local SSH server
@@ -23,7 +23,6 @@ pub async fn remote_execute(api_params: APIParameters) {
     channel.exec(&api_params.command).unwrap();
     let mut s = String::new();
     channel.read_to_string(&mut s).unwrap();
-    println!("{}", s);
     let _res = channel.wait_close();
     println!("{}", channel.exit_status().unwrap());
     if api_params.callback {
@@ -31,8 +30,10 @@ pub async fn remote_execute(api_params: APIParameters) {
         let uri = hyper::Uri::from_str(&url_str).unwrap();
         let _res = fetch_url(uri).await;
     }
+    fs::remove_file("semaphore.pid").expect("should delete semaphore");
 }
 
+#[allow(unused)]
 pub async fn remote_upload(node: String, file: String) {
     // connect to the local SSH server
     let tcp = TcpStream::connect(node.clone()).unwrap();
@@ -88,12 +89,12 @@ pub async fn local_execute(api_params: APIParameters) {
             println!("End of stream.");
             break;
         }
-        println!("The line: {:?}", line);
+        println!("{:?}", line);
     }
     if api_params.callback {
         let url_str = api_params.callback_url.unwrap();
         let uri = hyper::Uri::from_str(&url_str).unwrap();
         let _res = fetch_url(uri).await;
     }
-    println!("Done.");
+    fs::remove_file("semaphore.pid").expect("should delete semaphore");
 }
