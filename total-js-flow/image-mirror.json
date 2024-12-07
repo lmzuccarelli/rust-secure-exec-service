@@ -1,0 +1,315 @@
+{
+	"id": "fIuyfZW1co61f",
+	"name": "rust-image-mirror",
+	"author": "Luigi Mario Zuccarelli",
+	"version": "1.0.0",
+	"icon": "ti ti-network",
+	"reference": "image-mirror",
+	"group": "",
+	"url": "https://",
+	"cloning": false,
+	"color": "",
+	"readme": "",
+	"memory": 0,
+	"proxypath": "/mirror/",
+	"variables": {},
+	"dtcreated": "2024-12-03T13:28:46.472Z",
+	"worker": "fork",
+	"paused": false,
+	"env": "dev",
+	"asfiles": false,
+	"dtupdated": "2024-12-07T08:54:59.804Z",
+	"components": {
+		"code": "<script total>\n\n\texports.id = 'code';\n\texports.name = 'Code';\n\texports.group = 'Common';\n\texports.version = '4';\n\texports.icon = 'ti ti-code';\n\texports.author = 'Total.js';\n\texports.config = { outputs: 1, name: 'Code', code: '// instance {FlowStreamInstance};\\n// $ {FlowStreamMessage};\\n// vars {Object};\\n// repo {Object};\\n// data {String/Number/Boolean/Date/Buffer/Object};\\n// $.send(\\'output\\', data); // or simply send(data); which uses the first output\\n// $.destroy();\\n// $.throw(err);\\n\\n// IMPORTANT: If you do not perform re-send, you need to destroy this message via $.destroy() method\\n// IMPORTANT: methods $.send(), $.destroy() and $.throw() can be executed only once\\n\\n// $.send(\\'output\\', data);\\n$.destroy();' };\n\texports.inputs = [{ id: 'input', name: 'Input' }];\n\texports.outputs = [{ id: 'output', name: 'Output' }];\n\texports.meta = { settingswidth: 1200 };\n\n\texports.make = function(instance, config) {\n\n\t\tvar fn;\n\n\t\tinstance.message = function($) {\n\t\t\tif (fn) {\n\t\t\t\ttry {\n\t\t\t\t\tvar send = data => $.send('output', data);\n\t\t\t\t\tfn($.data, instance, $, $, F.require, send, $.repo, $.vars, $.data);\n\t\t\t\t} catch (e) {\n\t\t\t\t\t$.throw(e);\n\t\t\t\t\t$.destroy();\n\t\t\t\t}\n\t\t\t}\n\t\t};\n\n\t\tinstance.configure = function() {\n\t\t\tinstance.outputs = [];\n\t\t\tfor (let i = 1; i <= config.outputs; i++)\n\t\t\t\tinstance.outputs.push({ id: 'output' + (i === 1 ? '' : i), name: 'Output #' + i });\n\t\t\tinstance.save();\n\n\t\t\ttry {\n\t\t\t\tif (config.code) {\n\t\t\t\t\tinstance.status(1);\n\t\t\t\t\tfn = new Function('value', 'instance', '$', 'message', 'require', 'send', 'repo', 'vars', 'data', config.code);\n\t\t\t\t} else {\n\t\t\t\t\tinstance.status(0);\n\t\t\t\t\tfn = null;\n\t\t\t\t}\n\t\t\t} catch (e) {\n\t\t\t\tfn = null;\n\t\t\t\tinstance.throw('Code: ' + e.message);\n\t\t\t}\n\t\t};\n\n\t\tinstance.close = function() {\n\t\t\tfn = null;\n\t\t};\n\n\t\tinstance.configure();\n\n\t};\n\n</script>\n\n<readme>\nThis component executes a custom JavaScript code as it is.\n\nTo send data to the default output use `send(somedata);`\nTo send data to specific output when number of outputs > 1 use `$.send('outputX', somedata)` where `X` is output index, see example bellow:\n- first output--> `send(somedata)` or `$.send('output', somedata)`\n- second output --> `$.send('output2', somedata)`\n- ...\n- 5th output --> `$.send('output5', somedata)`\n- etc.\n</readme>\n\n<settings>\n\t<div class=\"padding\">\n\t\t<div class=\"row\">\n\t\t\t<div class=\"col-md-10 m\">\n\t\t\t\t<ui-component name=\"input\" path=\"?.name\">Name</ui-component>\n\t\t\t</div>\n\t\t\t<div class=\"col-md-2 m\">\n\t\t\t\t<ui-component name=\"input\" path=\"?.outputs\" config=\"type:number;format:\">Number of outputs</ui-component>\n\t\t\t</div>\n\t\t</div>\n\t\t<div class=\"ui-input-label\">Code:</div>\n\t\t<div class=\"m\">\n\t\t\t<ui-component name=\"codemirror\" path=\"?.code\" config=\"type:javascript;minheight:300;parent:auto;margin:60;tabs:true;trim:true\"></ui-component>\n\t\t</div>\n\t</div>\n</settings>\n\n<script>\n\tTOUCH(function(exports, init) {\n\t\texports.configure = function() {\n\t\t\tvar changes = exports.instance.changes;\n\t\t\tif (changes && changes.newbie) {\n\t\t\t\tvar outputs = [];\n\t\t\t\tvar count = exports.instance.config.outputs;\n\t\t\t\tfor (let i = 1; i <= count; i++)\n\t\t\t\t\toutputs.push({ id: 'output' + (i === 1 ? '' : i), name: (count === 1 ? 'Output' : 'Output #' + i) });\n\t\t\t\texports.instance.outputs = outputs;\n\t\t\t\tUPD('flow.data');\n\t\t\t}\n\t\t}\n\t});\n</script>\n\n<body>\n\t<header>\n\t\t<i class=\"ICON\"></i>NAME\n\t</header>\n</body>",
+		"request": "<script total>\n\n\texports.id = 'request';\n\texports.name = 'HTTP Request';\n\texports.group = 'Common';\n\texports.version = '7';\n\texports.icon = 'ti ti-cloud-download';\n\texports.author = 'Total.js';\n\texports.config = { url: '', method: 'GET', dnscache: true, insecure: false, secret: '', nocookies: true, xhr: false, parse: true, timeout: 10000, limit: 1024 * 500, responsebody: true, headers: {}, cookies: {}, serialize: null, send: 'all' };\n\texports.inputs = [{ id: 'payload', name: 'Payload' }];\n\texports.outputs = [{ id: 'response', name: 'Response' }, { id: 'error', name: 'Error' }];\n\n\texports.make = function(instance, config) {\n\n\t\tinstance.trigger = function() {\n\t\t\tinstance.message(instance.newmessage({}));\n\t\t};\n\n\t\tinstance.message = function($) {\n\n\t\t\tif (!config.url) {\n\t\t\t\t$.end();\n\t\t\t\treturn;\n\t\t\t}\n\n\t\t\tvar opt = {};\n\n\t\t\tfor (var key in config.headers) {\n\t\t\t\tif (!opt.headers)\n\t\t\t\t\topt.headers = {};\n\t\t\t\topt.headers[$.variables(key, true)] = $.variables(config.headers[key], true);\n\t\t\t}\n\n\t\t\tfor (var key in config.cookies) {\n\t\t\t\tif (!opt.cookies)\n\t\t\t\t\topt.cookies = {};\n\t\t\t\topt.cookies[$.variables(key, true)] = $.variables(config.cookies[key], true);\n\t\t\t}\n\n\t\t\topt.method = $.variables(config.method, true);\n\t\t\topt.url = $.variables(config.url, true);\n\t\t\topt.cook = true;\n\n\t\t\tvar secret = config.secret ? $.variables(config.secret, true) : null;\n\n\t\t\tif (config.serialize) {\n\t\t\t\tswitch (config.serialize) {\n\n\t\t\t\t\tcase 'json':\n\t\t\t\t\t\topt.type = 'json';\n\t\t\t\t\t\tif (opt.method !== 'GET')\n\t\t\t\t\t\t\topt.body = JSON.stringify($.data);\n\t\t\t\t\t\tbreak;\n\n\t\t\t\t\tcase 'urlencoded':\n\t\t\t\t\t\topt.type = 'urlencoded';\n\t\t\t\t\t\tif (opt.method === 'GET')\n\t\t\t\t\t\t\topt.query = U.toURLEncode($.data);\n\t\t\t\t\t\telse\n\t\t\t\t\t\t\topt.body = U.toURLEncode($.data);\n\t\t\t\t\t\tbreak;\n\n\t\t\t\t\tcase 'buffer':\n\t\t\t\t\t\topt.type = 'raw';\n\t\t\t\t\t\topt.body = $.data;\n\t\t\t\t\t\tbreak;\n\n\t\t\t\t}\n\t\t\t}\n\n\t\t\tif (secret && opt.body) {\n\t\t\t\topt.body = U.encrypt_data(opt.body, secret);\n\t\t\t\tif (!opt.headers)\n\t\t\t\t\topt.headers = {};\n\t\t\t\topt.headers['X-Encryption'] = 'a';\n\t\t\t}\n\n\t\t\tif (config.dnscache)\n\t\t\t\topt.dnscache = true;\n\n\t\t\tif (config.insecure)\n\t\t\t\topt.insecure = true;\n\n\t\t\tif (config.nocookies)\n\t\t\t\topt.nocookies = true;\n\n\t\t\tif (config.xhr)\n\t\t\t\topt.xhr = true;\n\n\t\t\tif (config.timeout)\n\t\t\t\topt.timeout = config.timeout;\n\n\t\t\tif (config.limit)\n\t\t\t\topt.limit = config.limit;\n\n\t\t\tif (config.send === 'chunks')\n\t\t\t\topt.custom = true;\n\n\t\t\topt.callback = function(err, response) {\n\n\t\t\t\tif (err) {\n\t\t\t\t\t$.data = err + '';\n\t\t\t\t\t$.send('error');\n\t\t\t\t\treturn;\n\t\t\t\t}\n\n\t\t\t\tif (opt.custom) {\n\t\t\t\t\tresponse.stream.on('data', data => $.send('response', data));\n\t\t\t\t\treturn;\n\t\t\t\t}\n\n\t\t\t\tif (config.send === 'headers') {\n\t\t\t\t\t$.send('response', response.headers);\n\t\t\t\t\treturn;\n\t\t\t\t}\n\n\t\t\t\tif (config.send === 'status') {\n\t\t\t\t\t$.send('response', response.status);\n\t\t\t\t\treturn;\n\t\t\t\t}\n\n\t\t\t\tbody = response.body;\n\n\t\t\t\tif (secret && response.headers['x-encryption'])\n\t\t\t\t\tbody = U.decrypt_data(body, secret);\n\n\t\t\t\tif (config.parse) {\n\t\t\t\t\tvar type = response.headers['content-type'] || '';\n\t\t\t\t\tif (type) {\n\t\t\t\t\t\tvar index = type.indexOf(';', 7);\n\t\t\t\t\t\tif (index !== -1)\n\t\t\t\t\t\t\ttype = type.substring(0, index).trim();\n\t\t\t\t\t}\n\t\t\t\t\tswitch (type.toLowerCase()) {\n\t\t\t\t\t\tcase 'text/xml':\n\t\t\t\t\t\tcase 'application/xml':\n\t\t\t\t\t\t\tbody = body ? body.parseXML(true) : {};\n\t\t\t\t\t\t\tbreak;\n\t\t\t\t\t\tcase 'application/x-www-form-urlencoded':\n\t\t\t\t\t\t\tbody = body ? DEF.parsers.urlencoded(body) : {};\n\t\t\t\t\t\t\tbreak;\n\t\t\t\t\t\tcase 'application/json':\n\t\t\t\t\t\tcase 'text/json':\n\t\t\t\t\t\t\tbody = body ? body.parseJSON(true) : null;\n\t\t\t\t\t\t\tbreak;\n\t\t\t\t\t\tdefault:\n\t\t\t\t\t\t\tbody = body && body.isJSON() ? body.parseJSON(true) : body;\n\t\t\t\t\t\t\tbreak;\n\t\t\t\t\t}\n\t\t\t\t}\n\n\t\t\t\tswitch (config.send) {\n\t\t\t\t\tcase 'all':\n\t\t\t\t\t\t$.data = { headers: response.headers, cookies: response.cookies, status: response.status, host: response.host, body: body };\n\t\t\t\t\t\tbreak;\n\t\t\t\t\tcase 'response':\n\t\t\t\t\t\t$.data = body;\n\t\t\t\t\t\tbreak;\n\t\t\t\t}\n\n\t\t\t\t$.send('response');\n\t\t\t};\n\n\t\t\tREQUEST(opt);\n\t\t};\n\n\t};\n\n</script>\n\n<style>\n\t.CLASS .status { font-size: 12px; margin: 0; padding: 5px 10px 10px; }\n\t.CLASS .status span { padding: 1px 3px; border-radius: var(--radius); color: #FFF; }\n</style>\n\n<readme>\nThe component makes a HTTP request. The response data will be serialized as the payload.\n\n__Response__:\n\n```json\n{\n\tstatus: Number,\n\theaders: { key: value },\n\tcookies: { key: value },\n\thost: String,\n\tbody: String/Object/Buffer\n}\n```\n</readme>\n\n<body>\n\t<header>\n\t\t<i class=\"ICON\"></i>NAME\n\t</header>\n\t<ui-bind path=\"CONFIG\" config=\"template;show:value.url\" class=\"block status\">\n\t\t<script type=\"text/html\">\n\t\t\t<div class=\"monospace hellip\" title=\"{{ value.url }}\"><span style=\"background:{{ value.method | color }}\">{{ value.method }}</span> {{ value.url }}</div>\n\t\t</script>\n\t</ui-bind>\n</body>\n\n<settings>\n\t<div class=\"padding\">\n\t\t<div class=\"message message-alert\">Method, URL address, headers and Cookies support dynamic variables. Variables are read from global Variables <code class=\"b\">{key}</code> and from the message data <code class=\"b\">{data.key}</code></div>\n\t</div>\n\t<div class=\"padding bg-smoke npb\">\n\n\t\t<div class=\"row\">\n\t\t\t<div class=\"col-md-3 m\">\n\t\t\t\t<ui-component name=\"input\" path=\"?.method\" config=\"dirsource:GET|GET,POST|POST,PUT|PUT,DELETE|DELETE,PATCH|PATCH;required:1\">Method</ui-component>\n\t\t\t</div>\n\t\t\t<div class=\"col-md-9 m\">\n\t\t\t\t<ui-component name=\"input\" path=\"?.url\" config=\"required:1\"><b>URL address</b></ui-component>\n\t\t\t</div>\n\t\t</div>\n\t</div>\n\t<div class=\"padding\">\n\t\t<div class=\"row\">\n\t\t\t<div class=\"col-md-3 m\">\n\t\t\t\t<ui-component name=\"input\" path=\"?.timeout\" config=\"type:number;format:\">Timeout</ui-component>\n\t\t\t\t<div class=\"help\"><i class=\"ti ti-clock\"></i><ui-bind path=\"?.timeout\" config=\"text:((value||0)/1000).floor(2)+' sec.'\"></ui-bind><br />Timeout <b>in milliseconds</b></div>\n\t\t\t</div>\n\t\t\t<div class=\"col-md-3 m\">\n\t\t\t\t<ui-component name=\"input\" path=\"?.limit\" config=\"type:number\">Max. size</ui-component>\n\t\t\t\t<div class=\"help\"><i class=\"ti ti-calculator\"></i><ui-bind path=\"?.limit\" config=\"text:(value||0).filesize()\"></ui-bind><br />Response max. size <b>in bytes</b></div>\n\t\t\t</div>\n\t\t\t<div class=\"col-md-6 m\">\n\t\t\t\t<ui-component name=\"input\" path=\"?.send\" config=\"required:1;dirsource:all|Everything,response|Response body,chunks|Chunks of buffer,headers|Headers only,status|Status code\">Send to output</ui-component>\n\t\t\t</div>\n\t\t</div>\n\t</div>\n\t<hr class=\"nmt nmb\" />\n\t<div class=\"padding\">\n\t\t<ui-component name=\"input\" path=\"?.serialize\" config=\"dirsource:json|JSON,urlencoded|URL encode,buffer|Buffer;dirraw:1;placeholder:None;dirempty:None\" class=\"m\">Data serialization</ui-component>\n\t\t<ui-component name=\"keyvalue\" path=\"?.headers\" config=\"placeholderkey:Header name;placeholdervalue:Header value and press enter\">Headers</ui-component>\n\t\t<div class=\"help m\">Headers support dynamic variables in the form <code>{key}</code></div>\n\t\t<ui-component name=\"keyvalue\" path=\"?.cookies\" config=\"placeholderkey:Cookie name;placeholdervalue:Cookie value and press enter\">Cookies</ui-component>\n\t\t<div class=\"help m\">Cookies support dynamic variables in the form <code>{key}</code></div>\n\t\t<hr />\n\t\t<ui-component name=\"input\" path=\"?.parse\" config=\"type:checkbox\">Parse Response to Object</ui-component>\n\t\t<ui-component name=\"input\" path=\"?.dnscache\" config=\"type:checkbox\">Enable DNS cache</ui-component>\n\t\t<ui-component name=\"input\" path=\"?.insecure\" config=\"type:checkbox\">Allow insecure connection</ui-component>\n\t\t<ui-component name=\"input\" path=\"?.xhr\" config=\"type:checkbox\">Add XHR header</ui-component>\n\t\t<hr />\n\t\t<ui-component name=\"input\" path=\"?.secret\" config=\"camouflage:1;icon:ti ti-totaljs\">Total.js Encryption/Decryption secret</ui-component>\n\t</div>\n</settings>",
+		"trigger": "<script total>\n\n\texports.id = 'trigger';\n\texports.name = 'Trigger';\n\texports.group = 'Triggers';\n\texports.version = '4';\n\texports.icon = 'ti ti-start';\n\texports.author = 'Total.js';\n\texports.config = { random: true, type: 'string', data: '', restart: false, prompt: false };\n\texports.outputs = [{ id: 'output', name: 'Output' }];\n\texports.kind = 'trigger';\n\n\texports.make = function(instance, config) {\n\n\t\tvar regprompt = /\\{prompt\\}/g;\n\n\t\tinstance.trigger = function(msg) {\n\n\t\t\tvar random = !config.prompt && config.random;\n\t\t\tvar val = config.data;\n\t\t\tvar prompt = msg.value || '';\n\n\t\t\tswitch (config.type) {\n\t\t\t\tcase 'number':\n\t\t\t\t\tval = random ? U.random() : val.replace(regprompt, prompt).parseFloat();\n\t\t\t\t\tbreak;\n\t\t\t\tcase 'buffer':\n\t\t\t\t\ttry {\n\t\t\t\t\t\tval = random ? Buffer.from(U.random_string()) : Buffer.from(val.replace(regprompt, prompt), 'base64');\n\t\t\t\t\t} catch (e) {\n\t\t\t\t\t\tinstance.throw(e);\n\t\t\t\t\t}\n\t\t\t\t\tbreak;\n\t\t\t\tcase 'date':\n\t\t\t\t\tval = random ? NOW.add('-' + U.random(500, 10) + ' seconds') : val.replace(regprompt, prompt).parseDate();\n\t\t\t\t\tbreak;\n\t\t\t\tcase 'object':\n\t\t\t\t\ttry {\n\t\t\t\t\t\tval = random ? {} : (new Function('return ' + val.replace(regprompt, prompt)))();\n\t\t\t\t\t} catch (e) {\n\t\t\t\t\t\tinstance.throw(e);\n\t\t\t\t\t}\n\t\t\t\t\tbreak;\n\t\t\t\tcase 'boolean':\n\t\t\t\t\tvar tmp = random ? '' : val.replace(regprompt, prompt);\n\t\t\t\t\tval = random ? U.random() % 2 === 0 : tmp === 'true' || tmp === 'on' || tmp === '1';\n\t\t\t\t\tbreak;\n\t\t\t\tdefault:\n\t\t\t\t\tval = random ? U.random_string(20) : val.replace(regprompt, prompt);\n\t\t\t\t\tbreak;\n\t\t\t}\n\n\t\t\tinstance.send('output', val);\n\t\t};\n\n\t\tconfig.restart && setTimeout(() => instance.trigger(), 5000);\n\t};\n\n</script>\n\n<style>\n\t.CLASS .padding { padding: 0 10px 10px; }\n\t.CLASS button { width: 100%; height: 24px; border: 1px solid #E0E0E0; border-radius: var(--radius); color: #000; background-color: #F0F0F0; margin: 0; }\n\t.CLASS button:hover { background-color: #F8F8F8; }\n\t.CLASS button:active { background-color: #E0E0E0; }\n\t.ui-dark .CLASS button { border-color: #404040; color: #FFF; background-color: #222; }\n\t.ui-dark .CLASS button:hover { background-color: #303030; }\n\t.ui-dark .CLASS button:active { background-color: #404040; }\n</style>\n\n<settings>\n\t<div class=\"padding\">\n\t\t<ui-component name=\"input\" path=\"?.type\" config=\"dirsource:string|String,number|Number,boolean|Boolean,date|Date,object|Object,buffer|Buffer as Base64;required:1\">Type</ui-component>\n\t\t<div class=\"mt10 m\">\n\t\t\t<ui-component name=\"input\" path=\"?.restart\" config=\"type:checkbox\">Trigger 5s after initialization.</ui-component>\n\t\t\t<ui-component name=\"input\" path=\"?.prompt\" config=\"type:checkbox\">Prompt</ui-component>\n\t\t\t<ui-bind path=\"?.prompt\" config=\"disabled\" class=\"block\">\n\t\t\t\t<ui-component name=\"input\" path=\"?.random\" config=\"type:checkbox\">Random data</ui-component>\n\t\t\t</ui-bind>\n\t\t\t<ui-bind path=\"?.prompt\" config=\"show\" class=\"block hidden m mt10\">\n\t\t\t\t<ui-component name=\"input\" path=\"?.promptlabel\" config=\"placeholder:Enter a value\"><b>Prompt label</b></ui-component>\n\t\t\t</ui-bind>\n\t\t</div>\n\t\t<ui-bind path=\"?\" config=\"hide:value.hide && !value.prompt\" class=\"hidden\">\n\t\t\t<hr />\n\t\t\t<ui-component name=\"input\" path=\"?.data\" config=\"required:1;height:250;type:multiline;maxlength:100000;monospace:1\">Data</ui-component>\n\t\t\t<ui-bind path=\"?.prompt\" config=\"show\" class=\"help hidden\">The prompt value will be assigned to the <code>{prompt}</code> keyword in the code.</ui-bind>\n\t\t</ui-bind>\n\t</div>\n</settings>\n\n<readme>\nThe component triggers data into the Flow.\n</readme>\n\n<body>\n\t<header>\n\t\t<i class=\"$ICON\"></i>$NAME\n\t</header>\n\t<div class=\"padding\">\n\t\t<button name=\"run\">Run</button>\n\t</div>\n</body>\n\n<script>\n\tTOUCH(function(exports) {\n\t\texports.click = function(el) {\n\t\t\tif (exports.config.prompt) {\n\t\t\t\tvar opt = {};\n\t\t\t\topt.name = exports.config.promptlabel || 'Enter a value';\n\t\t\t\topt.value = '';\n\t\t\t\topt.callback = function(val) {\n\t\t\t\t\texports.trigger({ value: val });\n\t\t\t\t};\n\t\t\t\tSETTER('prompt/show', opt);\n\t\t\t} else\n\t\t\t\texports.trigger();\n\t\t};\n\t});\n</script>",
+		"tresponse": "<script total>\n\n\texports.id = 'tresponse';\n\texports.name = 'Response';\n\texports.group = 'Total.js';\n\texports.icon = 'ti ti-bullhorn';\n\texports.version = '1';\n\texports.author = 'Total.js';\n\texports.config = { type: 'auto', code: 200, path: 'response' };\n\texports.inputs = [{ id: 'input', name: 'Response' }];\n\texports.outputs = [{ id: 'output', name: 'Log' }];\n\texports.kind = 'output';\n\n\texports.make = function(instance, config) {\n\n\t\tvar nested = false;\n\n\t\tinstance.message = function($) {\n\t\t\tvar ctrl = $.refs.controller;\n\t\t\tif (ctrl) {\n\n\t\t\t\tif (F.is5)\n\t\t\t\t\tctrl.response.status = config.code;\n\t\t\t\telse\n\t\t\t\t\tctrl.status = config.code;\n\n\t\t\t\tvar value = config.path ? (nested ? U.get(config.path, $.data) : $.data[config.path]) : $.data;\n\n\t\t\t\tswitch (config.type) {\n\t\t\t\t\tcase 'auto':\n\t\t\t\t\t\tif (value instanceof Array && value.length && value[0].error) {\n\t\t\t\t\t\t\tif (F.is5)\n\t\t\t\t\t\t\t\tctrl.response.status = 400;\n\t\t\t\t\t\t\telse\n\t\t\t\t\t\t\t\tctrl.status = 400;\n\t\t\t\t\t\t\tctrl.json(value);\n\t\t\t\t\t\t} else\n\t\t\t\t\t\t\tctrl.json(value);\n\t\t\t\t\t\tbreak;\n\t\t\t\t\tcase 'json':\n\t\t\t\t\t\tctrl.json(value);\n\t\t\t\t\t\tbreak;\n\t\t\t\t\tcase 'buffer':\n\t\t\t\t\t\tctrl.binary(typeof(value) === 'string' ? Buffer.from(value, 'utf8') : value, config.ctype);\n\t\t\t\t\t\tbreak;\n\t\t\t\t\tcase 'success':\n\t\t\t\t\t\tctrl.success();\n\t\t\t\t\t\tbreak;\n\t\t\t\t\tcase 'error':\n\t\t\t\t\t\tctrl.invalid(value);\n\t\t\t\t\t\tbreak;\n\t\t\t\t\tcase 'html':\n\t\t\t\t\t\tif (F.is5)\n\t\t\t\t\t\t\tctrl.html(value);\n\t\t\t\t\t\telse\n\t\t\t\t\t\t\tctrl.content(value, 'text/html');\n\t\t\t\t\t\tbreak;\n\t\t\t\t\tcase 'xml':\n\t\t\t\t\t\tif (F.is5)\n\t\t\t\t\t\t\tctrl.xml(value);\n\t\t\t\t\t\telse\n\t\t\t\t\t\t\tctrl.content(value, 'text/xml');\n\t\t\t\t\t\tbreak;\n\t\t\t\t\tcase 'plain':\n\t\t\t\t\t\tctrl.plain(value);\n\t\t\t\t\t\tbreak;\n\t\t\t\t\tcase 'empty':\n\t\t\t\t\tdefault:\n\t\t\t\t\t\tctrl.empty();\n\t\t\t\t\t\tbreak;\n\t\t\t\t}\n\n\t\t\t\t$.send('output', value);\n\t\t\t} else\n\t\t\t\t$.destroy();\n\t\t};\n\n\t\tinstance.configure = function() {\n\t\t\tnested = config.path && config.path.includes('.') ? true : false;\n\t\t};\n\t};\n\n</script>\n\n<readme>\nThis component can respond to an HTTP request.\n</readme>\n\n<settings>\n\t<div class=\"padding\">\n\t\t<div class=\"grid-3\">\n\t\t\t<div class=\"m\">\n\t\t\t\t<ui-component name=\"input\" path=\"?.type\" config=\"required:1;dirsource:auto|Auto,json|JSON,success|Success,error|Error,empty|Empty response,plain|Plain text,html|HTML,xml|XML,buffer|Buffer\">Type</ui-component>\n\t\t\t</div>\n\t\t\t<ui-bind path=\"?.type\" config=\"disabled:value === 'auto'\" class=\"m block\">\n\t\t\t\t<ui-component name=\"input\" path=\"?.code\" config=\"required:1;type:number;format:\">Status code</ui-component>\n\t\t\t</ui-bind>\n\t\t\t<div class=\"m\">\n\t\t\t\t<ui-component name=\"input\" path=\"?.path\" config=\"monospace:1;align:1\">Path for reading value</ui-component>\n\t\t\t</div>\n\t\t</div>\n\t\t<ui-bind path=\"?.type\" config=\"show:value==='buffer'\" class=\"m block hidden\">\n\t\t\t<div class=\"padding bg-smoke radius\">\n\t\t\t\t<ui-component name=\"input\" path=\"?.ctype\" config=\"required:1;placeholder:text/html\">Content type</ui-component>\n\t\t\t</div>\n\t\t</ui-bind>\n\t</div>\n</settings>\n\n<style>\n\t.CLASS header { padding: 6px !important; }\n\t.CLASS header ui-bind { font-family: var(--monospace); color: #FFF; margin-left: 4px; font-size: 12px; }\n\t.CLASS header ui-bind code { border-radius: var(--radius) 0 0 var(--radius); padding: 2px 3px; }\n\t.CLASS header ui-bind span { background-color: gray; border-radius: 0 var(--radius) var(--radius) 0; padding: 2px 3px; }\n</style>\n\n<body>\n\t<header>\n\t\t<i class=\"ICON\"></i>NAME\n\t\t<ui-bind path=\"CONFIG\" config=\"template\">\n\t\t\t<script type=\"text/html\">\n\t\t\t\t<code style=\"background:{{ if value.code >= 400 }}#E73323{{ else }}#4285F4{{ fi }}\">{{ value.code }}</code><span>{{ value.type }}</span>\n\t\t\t</script>\n\t\t</ui-bind>\n\t</header>\n</body>",
+		"print": "<script total>\n\n\texports.id = 'print';\n\texports.name = 'Print';\n\texports.group = 'Common';\n\texports.version = '5';\n\texports.icon = 'ti ti-print';\n\texports.author = 'Total.js';\n\texports.config = { repo: false, data: true };\n\texports.inputs = [{ id: 'input', name: 'Input' }];\n\n\texports.make = function(instance, config) {\n\n\t\tfunction serializer(key, value) {\n\t\t\treturn value && value.type === 'Buffer' && value.data ? ('<Buffer ' + value.data.splice(0, 10).map(n => n.toString(16).padLeft(2, '0')).join('') + '...') : value;\n\t\t}\n\n\t\tinstance.message = function($) {\n\n\t\t\tvar data = $.data;\n\n\t\t\tif (config.data !== false) {\n\t\t\t\tif (data instanceof Buffer)\n\t\t\t\t\tdata = '<Buffer ' + data.toString('hex').substring(0, 10) + '...';\n\t\t\t}\n\n\t\t\tvar count = 0;\n\n\t\t\tfor (var key in config) {\n\t\t\t\tif (config[key])\n\t\t\t\t\tcount++;\n\t\t\t}\n\n\t\t\tvar output = count > 1 ? {} : null;\n\n\t\t\tif (config.repo) {\n\t\t\t\tif (output)\n\t\t\t\t\toutput.repo = $.repo;\n\t\t\t\telse\n\t\t\t\t\toutput = $.repository;\n\t\t\t}\n\n\t\t\tif (config.data) {\n\t\t\t\tif (output)\n\t\t\t\t\toutput.data = $.data;\n\t\t\t\telse\n\t\t\t\t\toutput = $.data;\n\t\t\t}\n\n\t\t\tif (output) {\n\t\t\t\toutput = JSON.stringify(output, serializer);\n\t\t\t\tinstance.status(output, 200);\n\t\t\t}\n\n\t\t\t$.destroy();\n\t\t};\n\n\t\tinstance.trigger = function() {\n\t\t\tinstance.status('');\n\t\t};\n\n\t};\n\n</script>\n\n<style>\n\t.CLASS footer > ui-bind { margin: 10px; }\n\t.CLASS pre { font-size: 10px; margin: 0; padding: 5px; background-color: #F0F0F0; border-radius: var(--radius); }\n\t.CLASS .json { white-space: pre; }\n\t.CLASS .noscrollbar { max-height: 250px; }\n\t.CLASS .readme { position: absolute; position: absolute; font-size: 11px; right: 5px; margin-top: -5px; cursor: pointer; }\n\t.ui-dark .CLASS pre { background-color: #404040; tab-size: 2; }\n</style>\n\n<readme>\nThe component prints incoming data in a JSON format.\n</readme>\n\n<settings>\n\t<div class=\"padding\">\n\t\t<ui-component name=\"input\" path=\"?.repo\" config=\"type:checkbox\">Shows repository</ui-component>\n\t\t<ui-component name=\"input\" path=\"?.data\" config=\"type:checkbox\">Shows data</ui-component>\n\t</div>\n</settings>\n\n<body>\n\t<header>\n\t\t<button class=\"exec button\" data-exec=\"FUNC.trigger\">Clear</button>\n\t\t<i class=\"ICON\"></i>NAME\n\t</header>\n\t<footer>\n\t\t<ui-bind path=\"!STATUS\" config=\"html pre:Thelpers.jsonformat(JSON.stringify(JSON.parse(value), null, '\\t'));show:value && value.length > 0\" class=\"hidden selectable block\">\n\t\t\t<span class=\"readme\" title=\"Open in new window\"><i class=\"ti ti-window\"></i></span>\n\t\t\t<div class=\"noscrollbar mt5\">\n\t\t\t\t<pre class=\"json\"></pre>\n\t\t\t</div>\n\t\t</ui-bind>\n\t</footer>\n</body>\n\n<script>\n\tTOUCH(function(exports, reinit) {\n\n\t\tif (reinit)\n\t\t\treturn;\n\n\t\tvar laststatus;\n\n\t\texports.status = function(status, isinit) {\n\t\t\tlaststatus = status;\n\t\t};\n\n\t\texports.element.on('click', '.readme', function() {\n\t\t\tFUNC.readme('Debug', '```json\\n' + JSON.stringify(JSON.parse(laststatus), null, '  ') + '\\n```');\n\t\t});\n\n\t});\n</script>",
+		"troute": "<script total>\n\n\texports.id = 'troute';\n\texports.name = 'Route';\n\texports.group = 'Total.js';\n\texports.icon = 'ti ti-exchange';\n\texports.version = '2';\n\texports.author = 'Total.js';\n\texports.config = { url: '/', method: 'GET', timeout: 5000, limit: 5120, upload: false, user: 0, send: 'all', reader: '-' };\n\texports.outputs = [{ id: 'output', name: 'Request' }];\n\texports.kind = 'trigger';\n\n\texports.make = function(instance, config) {\n\n\t\tvar prev = null;\n\n\t\tinstance.close = function() {\n\t\t\tprev && prev.remove();\n\t\t\tprev = null;\n\t\t};\n\n\t\tinstance.configure = function() {\n\n\t\t\tif (prev) {\n\t\t\t\tprev && prev.remove();\n\t\t\t\tprev = null;\n\t\t\t}\n\n\t\t\tif (config.url && config.method) {\n\n\t\t\t\tvar flags = [];\n\n\t\t\t\tconfig.timeout && flags.push(F.is5 ? ('<' + Math.ceil(config.timeout / 1000) + 's') : config.timeout);\n\n\t\t\t\tif (F.is5)\n\t\t\t\t\tflags.push('<' + Math.ceil(config.limit / 1024) + 'MB');\n\n\t\t\t\tconfig.upload && flags.push((F.is5 ? '@' : '') + 'upload');\n\n\t\t\t\tvar action = function($) {\n\n\t\t\t\t\tvar ctrl = F.is5 ? $ : this;\n\t\t\t\t\tvar msg = instance.newmessage();\n\t\t\t\t\tvar data;\n\n\t\t\t\t\t// Parse cookies\n\t\t\t\t\tvar cookies = {};\n\t\t\t\t\tvar cookie = ctrl.headers.cookie;\n\n\t\t\t\t\tif (cookie) {\n\t\t\t\t\t\tlet arr = cookie.split(';');\n\t\t\t\t\t\tfor (let c of arr) {\n\t\t\t\t\t\t\tlet line = c.trim();\n\t\t\t\t\t\t\tlet index = line.indexOf('=');\n\t\t\t\t\t\t\tif (index !== -1)\n\t\t\t\t\t\t\t\tcookies[line.substring(0, index)] = line.substring(index + 1);\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\n\t\t\t\t\tvar query = ctrl.query;\n\t\t\t\t\tvar body = ctrl.body;\n\t\t\t\t\tvar params = ctrl.params;\n\n\t\t\t\t\tswitch (config.send) {\n\t\t\t\t\t\tcase 'payload':\n\t\t\t\t\t\t\tdata = body;\n\t\t\t\t\t\t\tbreak;\n\t\t\t\t\t\tcase 'query':\n\t\t\t\t\t\t\tdata = query;\n\t\t\t\t\t\t\tbreak;\n\t\t\t\t\t\tcase 'files':\n\t\t\t\t\t\t\tdata = ctrl.files;\n\t\t\t\t\t\t\tbreak;\n\t\t\t\t\t\tcase 'params':\n\t\t\t\t\t\t\tdata = params;\n\t\t\t\t\t\t\tbreak;\n\t\t\t\t\t\tcase 'headers':\n\t\t\t\t\t\t\tdata = ctrl.headers;\n\t\t\t\t\t\t\tbreak;\n\t\t\t\t\t\tcase 'user':\n\t\t\t\t\t\t\tdata = ctrl.user;\n\t\t\t\t\t\t\tbreak;\n\t\t\t\t\t\tcase 'cookies':\n\t\t\t\t\t\t\tdata = cookies;\n\t\t\t\t\t\t\tbreak;\n\t\t\t\t\t\tdefault:\n\t\t\t\t\t\t\tdata = { body: body, query: query, user: ctrl.user, files: ctrl.files, user: ctrl.user, url: ctrl.url, headers: ctrl.headers, params: params, ip: ctrl.ip, split: ctrl.split, cookies: cookies, ua: ctrl.ua };\n\t\t\t\t\t\t\tbreak;\n\t\t\t\t\t}\n\n\t\t\t\t\tmsg.refs.controller = ctrl;\n\n\t\t\t\t\tif (config.upload && config.reader && config.reader !== '-') {\n\t\t\t\t\t\tctrl.files.wait(function(file, next) {\n\t\t\t\t\t\t\tfile.read(function(err, buffer) {\n\t\t\t\t\t\t\t\tvar type = config.reader;\n\t\t\t\t\t\t\t\tif (type === 'datauri')\n\t\t\t\t\t\t\t\t\ttype = 'base64';\n\t\t\t\t\t\t\t\tfile.data = type === 'buffer' ? buffer : buffer.toString(type);\n\t\t\t\t\t\t\t\tif (config.reader === 'datauri')\n\t\t\t\t\t\t\t\t\tfile.data = 'data:' + file.type + ';base64,' + file.data;\n\t\t\t\t\t\t\t\tnext();\n\t\t\t\t\t\t\t});\n\t\t\t\t\t\t}, () => msg.send('output', data));\n\t\t\t\t\t} else\n\t\t\t\t\t\tmsg.send('output', data);\n\n\t\t\t\t};\n\n\t\t\t\tvar auth = config.user == 1 ? '+' : config.user == 2 ? '-' : '';\n\t\t\t\tvar url = config.url.replace(/#/g, instance.main.id);\n\t\t\t\tprev = F.is5 ? ROUTE(auth + config.method + ' ' + url + (config.action && config.method === 'API' ? (' ' + config.action) : '') + ' ' + flags.join(' '), action) : ROUTE(auth + config.method + ' ' + instance.replace(url) + (config.action && config.method === 'API' ? (' ' + config.action) : ''), action, flags, config.limit);\n\t\t\t}\n\t\t};\n\n\t\tinstance.configure();\n\t};\n\n</script>\n\n<readme>\nThis component registers an HTTP Route and sends request data next. It stores `controller` instance in the `message.refs.controller` property. You must respond to the REST response component.\n\n__Output data__:\n\n```js\n{\n\tip: String, // optional, IP address\n\turl: String, // optional\n\tlanguage: String, // optional\n\tua: String, // optional, parsed user-agent\n\tuser: Object, // optional\n\theaders: { key: String }, // optional, request headers\n\tcookies: { key: String }, // optional, cookies\n\tpayload: {}, // optional, request payload\n\tquery: { key: String }, // optional\n\tparams: { key: String }, // optional\n\tfiles: [{ type: String, filename: String, path: String, ext: String, size: Number, width: Number, height: Number, data:Buffer|String }] // optional\n}\n```\n</readme>\n\n<settings>\n\t<div class=\"padding\">\n\t\t<ui-bind path=\"flow.head.worker\" config=\"hide:!value || flow.head.origin.length < flow.head.proxyurl.length\" class=\"block\">\n\t\t\t<div class=\"message message-error\"><b><i class=\"ti ti-warning\"></i>No proxy endpoint defined.</b><br>This component will not work until then. Please go to main screen, open settings of this FlowStream instance and set the Endpoint.</div>\n\t\t</ui-bind>\n\t\t<div class=\"row\">\n\t\t\t<div class=\"col-md-3 m\">\n\t\t\t\t<ui-component name=\"input\" path=\"?.method\" config=\"required:1;dirsource:GET|GET,POST|POST,PUT|PUT,PATCH|PATCH,DELETE|DELETE,API|API\">Method</ui-component>\n\t\t\t\t<div class=\"help\">HTTP method</div>\n\t\t\t</div>\n\t\t\t<div class=\"col-md-9 m\">\n\t\t\t\t<ui-component name=\"input\" path=\"?.url\" config=\"monospace:1;required:1\">Relative URL address</ui-component>\n\t\t\t\t<div class=\"help\">A relative path to: <ui-bind path=\"flow.head.proxyurl\" config=\"text:value?value:window.location.origin\"></ui-bind><br />It supports wildcard <code>/something/*</code> or dynamic arguments <code>/products/{category}/</code>.<br /><code>#</code> will be replaced with a FlowStream <code>id</code> identifier.</div>\n\t\t\t</div>\n\t\t</div>\n\n\t\t<hr class=\"nmt\" />\n\n\t\t<ui-bind path=\"?.method\" config=\"show:value === 'API'\" class=\"block hidden m padding bg-smoke radius\">\n\t\t\t<ui-component name=\"input\" path=\"?.action\" config=\"monospace:1;required:1;placeholder:+users_read/{id}\">API Action</ui-component>\n\t\t</ui-bind>\n\n\t\t<ui-component name=\"input\" path=\"?.upload\" config=\"type:checkbox\" class=\"m\"><b>Allow uploading files (form data)</b></ui-component>\n\t\t<ui-bind path=\"?.upload\" config=\"enabled\">\n\t\t\t<ui-component name=\"input\" path=\"?.reader\" config=\"dirsource:-|Keep as files,buffer|Buffer,utf8|UTF-8,ascii|ASCII,datauri|Data URI,base64|Base64,hex|Hex\">Read files to</ui-component>\n\t\t</ui-bind>\n\t\t<hr />\n\n\t\t<div class=\"ui-input-label mt10\">Continue as:</div>\n\t\t<ui-component name=\"choose\" path=\"?.user\" config=\"selector:div;type:number\" class=\"iconmenu m\">\n\t\t\t<div data-id=\"1\" style=\"width:90px\">\n\t\t\t\t<i class=\"ti ti-lock\"></i>\n\t\t\t\t<span>Authorized</span>\n\t\t\t</div>\n\t\t\t<div data-id=\"2\" style=\"width:90px\">\n\t\t\t\t<i class=\"ti ti-unlock\"></i>\n\t\t\t\t<span>Unauthorized</span>\n\t\t\t</div>\n\t\t\t<div data-id=\"0\" style=\"width:90px\">\n\t\t\t\t<i class=\"ti ti-door-open\"></i>\n\t\t\t\t<span>Both</span>\n\t\t\t</div>\n\t\t</ui-component>\n\n\t\t<div class=\"grid-3\">\n\t\t\t<div class=\"m\">\n\t\t\t\t<ui-component name=\"input\" path=\"?.timeout\" config=\"required:1;type:number;format:\">Timeout</ui-component>\n\t\t\t</div>\n\t\t\t<div class=\"m\">\n\t\t\t\t<ui-component name=\"input\" path=\"?.limit\" config=\"required:1;type:number;ricon:!kB;align:1;format:\">Request limit</ui-component>\n\t\t\t</div>\n\t\t\t<div class=\"m\">\n\t\t\t\t<ui-component name=\"input\" path=\"?.send\" config=\"required:1;dirsource:all|Everything,payload|Payload,query|Query arguments,files|Files,params|Dynamic params,headers|Headers,cookies|Cookies,user|User\">Send to output</ui-component>\n\t\t\t</div>\n\t\t</div>\n\t</div>\n</settings>\n\n<style>\n\t.CLASS footer { padding: 10px; color: #999; }\n\t.CLASS footer .method { background-color: var(--color); color: #FFF; padding: 2px 3px; border-radius: var(--radius); }\n</style>\n\n<body>\n\t<header>\n\t\t<i class=\"$ICON\"></i>$NAME\n\t</header>\n\t<footer class=\"monospace\"></footer>\n</body>\n\n<script>\n\tTOUCH(function(exports, reinit) {\n\n\t\tvar template = Tangular.compile('{{ if value.user == 1 }}<i class=\"ti ti-lock red mr10\"></i>{{ else if value.user == 2 }}<i class=\"ti ti-unlock blue mr10\"></i>{{ fi }}<span class=\"method\">{{ value.method }}</span> <a href=\"{{ value.link }}\" target=\"_blank\">{{ value.url }}</a>{{ if value.method === \\'API\\' }} {{ value.action }}{{ fi }}');\n\n\t\tvar reload = function() {\n\t\t\tvar model = CLONE(exports.config);\n\t\t\tmodel.link = model.url = model.url.replace(/#/g, flow.head.id);\n\n\t\t\tif (flow.head.proxypath)\n\t\t\t\tmodel.link = flow.head.origin + (flow.head.proxypath + model.link).replace(/\\/{2,}/g, '/');\n\t\t\telse\n\t\t\t\tmodel.link = flow.head.origin + model.link;\n\n\t\t\texports.element.find('footer').html(template({ value: model }));\n\t\t};\n\n\t\texports.configure = reload;\n\t\treload();\n\t});\n</script>",
+		"debug": "<script total>\n\n\texports.id = 'debug';\n\texports.name = 'Debug';\n\texports.group = 'Common';\n\texports.version = '4';\n\texports.icon = 'ti ti-circle-alt';\n\texports.color = '#E73323';\n\texports.author = 'Total.js';\n\texports.config = { repo: false, debug: true, data: true, watch: [] };\n\texports.meta = { singleton: true };\n\n\texports.make = function(instance, config) {\n\n\t\tvar filter = null;\n\n\t\tfunction serializer(key, value) {\n\t\t\treturn value && value.type === 'Buffer' && value.data ? ('<Buffer ' + value.data.splice(0, 10).map(n => n.toString(16).padLeft(2, '0')).join('') + '...') : value;\n\t\t}\n\n\t\tinstance.main.ondebug = function(a, b, c, d) {\n\n\t\t\tif (filter && !filter[this.id])\n\t\t\t\treturn;\n\n\t\t\tNOW = new Date();\n\n\t\t\tvar output = [];\n\n\t\t\tif (a !== undefined)\n\t\t\t\toutput.push(a);\n\t\t\tif (b !== undefined)\n\t\t\t\toutput.push(b);\n\t\t\tif (c !== undefined)\n\t\t\t\toutput.push(c);\n\t\t\tif (d !== undefined)\n\t\t\t\toutput.push(d);\n\n\t\t\tinstance.status({ name: this.module.name, type: 'debug', date: NOW, data: JSON.stringify(output, serializer) });\n\t\t};\n\n\t\tinstance.logger && instance.logger(function($) {\n\n\t\t\tif (filter && !filter[$.fromid])\n\t\t\t\treturn;\n\n\t\t\tif (!config.data && !config.repo)\n\t\t\t\treturn;\n\n\t\t\tvar data = $.data;\n\n\t\t\tif (config.data !== false) {\n\t\t\t\tif (data instanceof Buffer)\n\t\t\t\t\tdata = data.toString('hex').substring(0, 200);\n\t\t\t}\n\n\t\t\tvar count = 0;\n\n\t\t\tfor (var key in config) {\n\t\t\t\tif (config[key])\n\t\t\t\t\tcount++;\n\t\t\t}\n\n\t\t\tvar output = count > 1 ? {} : null;\n\n\t\t\tif (config.repo) {\n\t\t\t\tif (output)\n\t\t\t\t\toutput.repo = $.repo;\n\t\t\t\telse\n\t\t\t\t\toutput = $.repository;\n\t\t\t}\n\n\t\t\tif (config.data) {\n\t\t\t\tif (output)\n\t\t\t\t\toutput.data = $.data;\n\t\t\t\telse\n\t\t\t\t\toutput = $.data;\n\t\t\t}\n\n\t\t\tNOW = new Date();\n\t\t\toutput && instance.status({ name: $.from.module.name, type: 'message', date: NOW, data: JSON.stringify(output, serializer) });\n\t\t});\n\n\t\tinstance.configure = function() {\n\t\t\tif (config.watch && config.watch.length) {\n\t\t\t\tfilter = {};\n\t\t\t\tfor (var id of config.watch)\n\t\t\t\t\tfilter[id] = 1;\n\t\t\t} else\n\t\t\t\tfilter = null;\n\t\t};\n\n\t\tinstance.trigger = function() {\n\n\t\t\tvar components = instance.main.meta.components;\n\t\t\tvar schema = instance.main.meta.flow;\n\n\t\t\tfor (var key in schema) {\n\t\t\t\tvar m = schema[key];\n\t\t\t\tif (m.component) {\n\t\t\t\t\tvar c = components[m.component];\n\t\t\t\t\tif (c.name === 'Debug')\n\t\t\t\t\t\tm.status({});\n\t\t\t\t}\n\t\t\t}\n\n\t\t};\n\n\t\tinstance.configure();\n\n\t\tif (!instance.logger)\n\t\t\tinstance.throw('You need to update Total.js framework');\n\n\t};\n\n</script>\n\n<style>\n\t.CLASS { border-color: #E73323 !important; }\n\t.CLASS .area { background: #FEE7E7; }\n\t.CLASS header i { animation: 1s blink infinite alternate forwards; border-radius: 100px; }\n\t.CLASS footer { padding: 10px; }\n\t.CLASS pre, .debugform pre { font-size: 10px; margin: 0; padding: 5px; background-color: #F0F0F0; border-radius: var(--radius); }\n\t.debugform .date { font-size: 11px; margin-bottom: 5px; }\n\t.debugform .name { float: right; font-size: 11px; font-weight: bold; }\n\t.debugform pre:before { display: block; color: rgba(0, 0, 0, 0.3); margin-bottom: 5px; }\n\t.debugform .type-debug pre { background: #e6f4f7; }\n\t.debugform .type-debug pre:before { content: 'Debug'; }\n\t.debugform .type-message pre:before { content: 'Message'; }\n\t.ui-dark .CLASS .area { background: #7e4d4d; }\n\t.ui-dark .CLASS pre, .ui-dark .debugform pre { background-color: #404040; }\n\t.ui-dark .debugform pre:before { color: rgba(255, 255, 255, 0.3); }\n\t.ui-dark .debugform .type-debug pre { background: #283857; }\n</style>\n\n<readme>\nThe component can print the payload of incoming messages and `instance.debug()` log messages in JSON format.\n</readme>\n\n<settings>\n\t<div class=\"padding\">\n\t\t<ui-component name=\"input\" path=\"?.repo\" config=\"type:checkbox\">Shows repository</ui-component>\n\t\t<ui-component name=\"input\" path=\"?.data\" config=\"type:checkbox\">Shows data</ui-component>\n\t\t<ui-component name=\"input\" path=\"?.debug\" config=\"type:checkbox\">Shows debug messages</ui-component>\n\t\t<hr />\n\t\t<ui-component name=\"input\" path=\"%debugsearch\" config=\"type:search;placeholder:Search components\" class=\"m\">Search</ui-component>\n\t\t<ui-component name=\"search\" path=\"%debugsearch\" config=\"selector:figure\">\n\t\t\t<ui-component name=\"selection\" path=\"?.watch\" config=\"datasource:flow.instances;click:figure\">\n\t\t\t\t<ui-bind path=\"flow.instances\" config=\"template\" class=\"block listing2 small\">\n\t\t\t\t\t<script type=\"text/html\">\n\t\t\t\t\t\t{{ foreach m in value }}\n\t\t\t\t\t\t<figure data-search=\"{{ m.id }} {{ m.Component.name }}{{ if m.note }} {{ m.note }}{{ fi }}\">\n\t\t\t\t\t\t\t<section>\n\t\t\t\t\t\t\t\t<span class=\"selection\" data-id=\"{{ m.id }}\"><i class=\"ti ti-eye\"></i></span>{{ m.Component.name }}{{ if m.note }}<span class=\"gray ml10\">{{ m.note }}</span>{{ fi }}\n\t\t\t\t\t\t\t</section>\n\t\t\t\t\t\t</figure>\n\t\t\t\t\t\t{{ end }}\n\t\t\t\t\t</script>\n\t\t\t\t</ui-bind>\n\t\t\t</ui-component>\n\t\t</ui-component>\n\t</div>\n</settings>\n\n<body>\n\t<header>\n\t\t<i class=\"ti ti-bull\" style=\"background:#E73323;color:#FFF\"></i><b>NAME</b>\n\t</header>\n\t<footer>\n\t\t<div><button class=\"button\" name=\"toggle\"><i class=\"ti ti-eye\"></i>Toggle</button></div>\n\t</footer>\n</body>\n\n<script>\n\n\tTOUCH(function(exports, reinit) {\n\n\t\tvar services = [];\n\n\t\tif (!reinit) {\n\n\t\t\tif (!W.debugwindow) {\n\t\t\t\tCACHEPATH('common.$debug', '1 week');\n\t\t\t\tW.debugwindow = [];\n\t\t\t\tW.debugwindowclear = function() {\n\t\t\t\t\tfor (var key in flow.data) {\n\t\t\t\t\t\tvar com = flow.data[key];\n\t\t\t\t\t\tif (com.name === 'debug') {\n\t\t\t\t\t\t\tflowinstances.instances[key].clear();\n\t\t\t\t\t\t\tbreak;\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t};\n\n\t\t\t\t$(document.body).append('<ui-component name=\"box\" path=\"common.$debug\" config=\"if:debugform;align:right;width:420;background:false;transparent:true;title:Debug panel;icon:ti ti-bug;zindex:5;$id:debugwindowbox\"><nav><button class=\"exec\" data-exec=\"debugwindowclear\"><i class=\"ti ti-remove red\"></i>Clear</button></nav><div class=\"padding debugform\" id=\"debugformbody\"></div></ui-component>');\n\n\t\t\t\texports.element.on('click', 'button', function() {\n\t\t\t\t\tSET('common.$debug', common.$debug ? '' : 'debugform');\n\t\t\t\t});\n\t\t\t}\n\t\t}\n\n\t\texports.close = function() {\n\t\t\tNUL('common.$debug');\n\t\t\tdelete W.debugwindow;\n\t\t\tdelete W.debugwindowclear;\n\t\t\tSETTER('#debugwindowbox/remove');\n\t\t};\n\n\t\texports.clear = function() {\n\t\t\texports.trigger();\n\t\t\t$('#debugformbody').empty();\n\t\t};\n\n\t\texports.status = function(data) {\n\t\t\tif (data && data.date)\n\t\t\t\t$('#debugformbody').prepend('<div class=\"m type-{3}\"><div class=\"name\">{0}</div><div class=\"date\"><i class=\"ti ti-calendar mr5\"></i>{1}</div><pre class=\"json\">{2}</pre></div>'.format(data.name, data.date.format('[ts]'), Thelpers.jsonformat(JSON.stringify(JSON.parse(data.data), '\\t')), data.type || 'message'));\n\t\t};\n\n\t});\n\n</script>",
+		"crontab": "<script total>\n\n\texports.id = 'crontab';\n\texports.name = 'Crontab';\n\texports.icon = 'ti ti-clock';\n\texports.author = 'Peter Širka / Total.js';\n\texports.version = '1';\n\texports.group = 'Triggers';\n\texports.config = { random: true, type: 'now', data: '', timers: ['0 9 * * *'], restart: false };\n\texports.outputs = [{ id: 'output', name: 'Output' }];\n\texports.kind = 'trigger';\n\n\texports.make = function(instance, config) {\n\n\t\tvar timers = null;\n\t\tvar days = ['su', 'mo', 'tu', 'we', 'th', 'fr', 'sa'];\n\t\tvar func = {};\n\n\t\tfunc.cronexec = function(output, date) {\n\n\t\t\tvar m = date.getMinutes();\n\t\t\tvar h = date.getHours();\n\t\t\tvar d = date.getDate();\n\t\t\tvar M = date.getMonth() + 1;\n\t\t\tvar day = date.getDay();\n\t\t\tvar is = true;\n\t\t\tvar values = [m, h, d, M, day];\n\n\t\t\tfor (var i = 0; i < output.length; i++) {\n\n\t\t\t\tvar val = values[i];\n\t\t\t\tvar m = output[i];\n\n\t\t\t\tif (m.type === 'equal') {\n\t\t\t\t\tif (m.value !== val) {\n\t\t\t\t\t\tis = false;\n\t\t\t\t\t\tbreak;\n\t\t\t\t\t}\n\t\t\t\t} else if (m.type === 'every') {\n\t\t\t\t\tif (m.value % val !== 0) {\n\t\t\t\t\t\tis = false;\n\t\t\t\t\t\tbreak;\n\t\t\t\t\t}\n\t\t\t\t} else if (m.type === 'in') {\n\t\t\t\t\tif (!m.value.includes(val)) {\n\t\t\t\t\t\tis = false;\n\t\t\t\t\t\tbreak;\n\t\t\t\t\t}\n\t\t\t\t} else if (m.type === 'between') {\n\t\t\t\t\tif (val < m.value[0] || val > m.value[1]) {\n\t\t\t\t\t\tis = false;\n\t\t\t\t\t\tbreak;\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\n\t\t\treturn is;\n\t\t};\n\n\t\tfunc.cronmake = function(line) {\n\n\t\t\t// */15 = every 15\n\t\t\t// 1-2  = BETWEEN\n\t\t\t// 1,2  = IN\n\n\t\t\tvar days = ['su', 'mo', 'tu', 'we', 'th', 'fr', 'sa'];\n\t\t\tvar arr = line.toLowerCase().replace(/[a-z]+/g, text => days.indexOf(text.substring(0, 2))).split(/\\s|\\t/).trim();\n\t\t\tvar output = [];\n\n\t\t\tfor (var m of arr) {\n\n\t\t\t\tvar obj = {};\n\t\t\t\tvar tmp = null;\n\n\t\t\t\tif (m === '*') {\n\t\t\t\t\tobj.type = '*';\n\t\t\t\t} else if (m.indexOf('/') !== -1) {\n\t\t\t\t\ttmp = m.split('/');\n\t\t\t\t\tobj.type = 'every';\n\t\t\t\t\tfor (let i = 0; i < tmp.length; i++) {\n\t\t\t\t\t\tif (tmp[i] !== '*')\n\t\t\t\t\t\t\ttmp[i] = +tmp[i];\n\t\t\t\t\t}\n\t\t\t\t\tobj.value = tmp;\n\t\t\t\t} else if (m.indexOf(',') !== -1) {\n\t\t\t\t\ttmp = m.split(',');\n\t\t\t\t\tobj.type = 'in';\n\t\t\t\t\tfor (let i = 0; i < tmp.length; i++)\n\t\t\t\t\t\ttmp[i] = +tmp[i];\n\t\t\t\t\tobj.value = tmp;\n\t\t\t\t} else if (m.indexOf('-') !== -1) {\n\t\t\t\t\ttmp = m.split('-');\n\t\t\t\t\tobj.type = 'between';\n\t\t\t\t\tfor (let i = 0; i < tmp.length; i++)\n\t\t\t\t\t\ttmp[i] = +tmp[i];\n\t\t\t\t\tobj.value = tmp;\n\t\t\t\t} else {\n\t\t\t\t\tobj.type = 'equal';\n\t\t\t\t\tobj.value = +m;\n\t\t\t\t}\n\n\t\t\t\toutput.push(obj);\n\t\t\t}\n\n\t\t\treturn function(date) {\n\t\t\t\treturn func.cronexec(output, date);\n\t\t\t};\n\t\t};\n\n\t\tinstance.vary = instance.configure = function() {\n\t\t\ttimers = [];\n\t\t\tfor (var m of config.timers)\n\t\t\t\ttimers.push(func.cronmake(instance.replace(m)));\n\t\t};\n\n\t\tvar send = function() {\n\n\t\t\tvar val;\n\n\t\t\tswitch (config.type) {\n\t\t\t\tcase 'now':\n\t\t\t\t\tval = new Date();\n\t\t\t\t\tbreak;\n\t\t\t\tcase 'number':\n\t\t\t\t\tval = config.random ? U.random() : config.data.parseFloat();\n\t\t\t\t\tbreak;\n\t\t\t\tcase 'buffer':\n\t\t\t\t\ttry {\n\t\t\t\t\t\tval = config.random ? Buffer.from(U.random_string()) : Buffer.from(config.data, 'base64');\n\t\t\t\t\t} catch (e) {\n\t\t\t\t\t\tinstance.throw(e);\n\t\t\t\t\t}\n\t\t\t\t\tbreak;\n\t\t\t\tcase 'date':\n\t\t\t\t\tval = config.random ? NOW.add('-' + U.random(500, 10) + ' seconds') : config.data.parseDate();\n\t\t\t\t\tbreak;\n\t\t\t\tcase 'object':\n\t\t\t\t\ttry {\n\t\t\t\t\t\tval = config.random ? {} : (new Function('return ' + config.data))();\n\t\t\t\t\t} catch (e) {\n\t\t\t\t\t\tinstance.throw(e);\n\t\t\t\t\t}\n\t\t\t\t\tbreak;\n\t\t\t\tcase 'boolean':\n\t\t\t\t\tval = config.random ? U.random() % 2 === 0 : config.data === 'true' || config.data === 'on' || config.data === '1';\n\t\t\t\t\tbreak;\n\t\t\t\tdefault:\n\t\t\t\t\tval = config.random ? U.random_string(20) : config.data;\n\t\t\t\t\tbreak;\n\t\t\t}\n\n\t\t\tinstance.newmessage(val).send('output');\n\t\t};\n\n\t\tinstance.trigger = function() {\n\t\t\tsend();\n\t\t};\n\n\t\tinstance.service = function() {\n\t\t\tvar dt = config.offset ? new Date(NOW.getTime() - (config.offset * 60 * 1000)) : NOW;\n\t\t\tfor (var m of timers) {\n\t\t\t\tif (m(dt)) {\n\t\t\t\t\tsend();\n\t\t\t\t\tbreak;\n\t\t\t\t}\n\t\t\t}\n\t\t};\n\n\t\tinstance.configure();\n\t\tconfig.restart && setInterval(send, 5000);\n\n\t};\n\n</script>\n\n<readme>\nThe component can make a trigger in the specific time and date.\n\n## Cron string: `* * * * *`\n\nMeaning of each `*` explained bellow, in order from left to right:\n\n- minute `0 - 59`\n- hour `0 - 23`\n- day of month `1 - 31`\n- month `1 - 12`\n- day of week `0 - 6` and `0` is Sunday\n\n```\n0 16 * * *      -> trigger every day at 16:00\n20 19 * * *     -> every day at 19:20 and 19:40\n* * * * *       -> trigger every minute\n0 20 * * 1      -> every monday at 20:00\n```\n</readme>\n\n<style>\n\t.CLASS .padding { padding: 0 10px 10px; }\n\t.CLASS button { width: 100%; height: 24px; border: 1px solid #E0E0E0; border-radius: var(--radius); color: #000; background-color: #F0F0F0; margin: 0; }\n\t.CLASS button:hover { background-color: #F8F8F8; }\n\t.CLASS button:active { background-color: #E0E0E0; }\n\t.CLASS footer { padding: 10px; font-size: 12px; }\n\t.CLASS-settings input { font-family: Menlo, Consolas, monospace; }\n\t.ui-dark .CLASS button { border-color: #404040; color: #FFF; background-color: #222; }\n\t.ui-dark .CLASS button:hover { background-color: #303030; }\n\t.ui-dark .CLASS button:active { background-color: #404040; }\n</style>\n\n<settings>\n\t<div class=\"padding CLASS-settings\">\n\n\t\t<ui-component name=\"textboxlist\" path=\"?.timers\" config=\"maxlength:50;required:1;placeholder:* 1 * * *\" class=\"m\">Timers</ui-component>\n\n\t\t<div class=\"help monospace\">\n\t\t\t<div>* * * * *</div>\n\t\t\t<div>1MINUTE 2HOUR 3DAY 4MONTH 5DAYOFWEEK</div>\n\t\t</div>\n\n\t\t<div class=\"help\"><a href=\"https://crontab.guru/examples.html\" target=\"_blank\" class=\"link\"><i class=\"ti ti-flask mr5\"></i>Examples</a></div>\n\n\t\t<hr />\n\t\t<ui-component name=\"input\" path=\"?.restart\" config=\"type:checkbox\">Trigger 5s after initialization.</ui-component>\n\t\t<hr />\n\n\t\t<div class=\"grid-4\">\n\t\t\t<div>\n\t\t\t\t<ui-component name=\"input\" path=\"?.offset\" config=\"type:number;format:\" default=\"NOW.getTimezoneOffset()\">Time zone offset</ui-component>\n\t\t\t</div>\n\t\t</div>\n\t\t<div class=\"help m\">Must be defined in minutes. The backend time is in UTC format.<br />Your current time zone offset is: <ui-bind path=\"NOW\" config=\"text:value.getTimezoneOffset()\" class=\"b\"></ui-bind> minutes</div>\n\n\t\t<div class=\"caption m\">\n\t\t\t<label><i class=\"ti ti-comment\"></i>Data sending</label>\n\t\t</div>\n\n\t\t<ui-component name=\"input\" path=\"?.type\" config=\"dirsource:string|String,number|Number,boolean|Boolean,now|Current date and time,date|Date,object|Object,buffer|Buffer as Base64;required:1\">Type</ui-component>\n\t\t<div class=\"help\">Choose an output type</div>\n\n\t\t<ui-bind path=\"?.type\" config=\"show:value!=='now'\" class=\"block\">\n\t\t\t<div class=\"mt10 m\">\n\t\t\t\t<ui-component name=\"input\" path=\"?.random\" config=\"type:checkbox\">Random data</ui-component>\n\t\t\t</div>\n\t\t\t<ui-bind path=\"?.random\" config=\"hide\" class=\"hidden block\">\n\t\t\t\t<hr />\n\t\t\t\t<ui-component name=\"input\" path=\"?.data\" config=\"required:1;height:250;type:multiline;maxlength:100000;monospace:1\">Data</ui-component>\n\t\t\t</ui-bind>\n\t\t</ui-bind>\n\n\t</div>\n</settings>\n\n<body>\n\t<header>\n\t\t<i class=\"ICON\"></i>NAME\n\t</header>\n\t<div class=\"padding\">\n\t\t<button class=\"exec\" data-exec=\"FUNC.trigger\">Run</button>\n\t</div>\n\t<footer>Count of timers: <ui-bind path=\"CONFIG.timers\" config=\"text:value ? value.length : 0\" class=\"b\"></ui-bind></footer>\n</body>"
+	},
+	"design": {
+		"im45h9iry": {
+			"id": "im45h9iry",
+			"config": {
+				"random": false,
+				"type": "string",
+				"data": "{\n  \"apiVersion\": \"task-execute.application.io/v1alpha1\",\n  \"kind\": \"TaskExecute\",\n  \"spec\": {\n    \"nodes\": [\n      {\n        \"name\": \"localhost\",\n       \t\"parameters\": {\n    \t\t\t\"command\": \"./scripts/mirror-to-disk.sh\",\n    \t\t\t\"user\": \"lzuccarelli\",\n    \t\t\t\"callback\": true,\n    \t\t\t\"callbackUrl\": \"http://192.168.1.27:8000/mirror/notify\",\n\t\t\t\t\t\"consoleLog\": true,\n\t\t\t\t\t\"errorUrl\": \"http://192.168.1.27:8000/mirror/error\"\n\t\t\t\t}\n\t\t\t}\n\t\t]\n\t}\n}",
+				"restart": false,
+				"prompt": false
+			},
+			"x": 78,
+			"y": 20.000000000000004,
+			"note": "Mirror to Disk flow",
+			"component": "trigger",
+			"connections": {
+				"output": [
+					{
+						"id": "im45h9oft",
+						"index": "payload"
+					}
+				]
+			}
+		},
+		"im45h9oft": {
+			"id": "im45h9oft",
+			"config": {
+				"url": "https://192.168.1.29:1337/process",
+				"method": "POST",
+				"dnscache": true,
+				"insecure": true,
+				"secret": "",
+				"nocookies": true,
+				"xhr": false,
+				"parse": true,
+				"timeout": 10000,
+				"limit": 512000,
+				"responsebody": true,
+				"headers": {},
+				"cookies": {},
+				"serialize": "buffer",
+				"send": "all"
+			},
+			"x": 362,
+			"y": 80,
+			"note": "Handles payload from trigger",
+			"component": "request",
+			"connections": {
+				"response": [
+					{
+						"id": "im45ha57u",
+						"index": "input"
+					}
+				],
+				"error": [
+					{
+						"id": "im45haeqt",
+						"index": "input"
+					}
+				]
+			}
+		},
+		"im45ha57u": {
+			"id": "im45ha57u",
+			"config": {
+				"repo": false,
+				"data": true
+			},
+			"x": 1032,
+			"y": 27,
+			"component": "print",
+			"connections": {}
+		},
+		"im45haeqt": {
+			"id": "im45haeqt",
+			"config": {
+				"repo": false,
+				"data": true
+			},
+			"x": 774,
+			"y": 290,
+			"component": "print",
+			"connections": {}
+		},
+		"im48i73wj": {
+			"id": "im48i73wj",
+			"config": {
+				"type": "auto",
+				"code": 200,
+				"path": "response"
+			},
+			"x": 362,
+			"y": 522,
+			"component": "tresponse",
+			"connections": {
+				"output": [
+					{
+						"id": "im48i8p6s",
+						"index": "input"
+					},
+					{
+						"id": "im4cpo7mk",
+						"index": "input"
+					}
+				]
+			}
+		},
+		"im48i7v01": {
+			"id": "im48i7v01",
+			"config": {
+				"url": "notify",
+				"method": "GET",
+				"timeout": 5000,
+				"limit": 5120,
+				"upload": false,
+				"user": 2,
+				"send": "headers",
+				"reader": "-"
+			},
+			"x": 77,
+			"y": 465,
+			"component": "troute",
+			"connections": {
+				"output": [
+					{
+						"id": "im48i73wj",
+						"index": "input"
+					}
+				]
+			}
+		},
+		"im48i8p6s": {
+			"id": "im48i8p6s",
+			"config": {
+				"repo": false,
+				"data": true
+			},
+			"x": 669,
+			"y": 420,
+			"component": "print",
+			"connections": {}
+		},
+		"im4cokzxv": {
+			"id": "im4cokzxv",
+			"config": {
+				"url": "error",
+				"method": "GET",
+				"timeout": 5000,
+				"limit": 5120,
+				"upload": false,
+				"user": 2,
+				"send": "headers",
+				"reader": "-"
+			},
+			"x": 70,
+			"y": 816,
+			"component": "troute",
+			"connections": {
+				"output": [
+					{
+						"id": "im4colu6c",
+						"index": "input"
+					}
+				]
+			}
+		},
+		"im4colu6c": {
+			"id": "im4colu6c",
+			"config": {
+				"type": "auto",
+				"code": 200,
+				"path": "response"
+			},
+			"x": 342,
+			"y": 876,
+			"component": "tresponse",
+			"connections": {
+				"output": [
+					{
+						"id": "im4com2r8",
+						"index": "input"
+					}
+				]
+			}
+		},
+		"im4com2r8": {
+			"id": "im4com2r8",
+			"config": {
+				"repo": false,
+				"data": true
+			},
+			"x": 610,
+			"y": 823,
+			"component": "print",
+			"connections": {}
+		},
+		"im4cpo7mk": {
+			"id": "im4cpo7mk",
+			"config": {
+				"outputs": 1,
+				"name": "disk-to-mirror",
+				"code": "// instance {FlowStreamInstance};\n// $ {FlowStreamMessage};\n// vars {Object};\n// repo {Object};\n// data {String/Number/Boolean/Date/Buffer/Object};\n// $.send('output', data); // or simply send(data); which uses the first output\n// $.destroy();\n// $.throw(err);\n\n// IMPORTANT: If you do not perform re-send, you need to destroy this message via $.destroy() method\n// IMPORTANT: methods $.send(), $.destroy() and $.throw() can be executed only once\n\nconst json_data = {\n  \"apiVersion\": \"task-execute.application.io/v1alpha1\",\n  \"kind\": \"TaskExecute\",\n  \"spec\": {\n    \"nodes\": [\n      {\n        \"name\": \"localhost\",\n       \t\"parameters\": {\n    \t\t\t\"command\": \"./scripts/delay.sh\",\n    \t\t\t\"user\": \"lzuccarelli\",\n    \t\t\t\"callback\": false,\n    \t\t\t\"callbackUrl\": \"http://192.168.1.27:8000/mirror/notify\",\n\t\t\t\t\"consoleLog\": true,\n\t\t\t\t\"errorUrl\": \"http://192.168.1.27:8000/mirror/error\"\n\t\t}\n\t}]\n  }\n};\n\n$.send('output', JSON.stringify(json_data));"
+			},
+			"x": 916,
+			"y": 712,
+			"note": "Disk to Mirror flow",
+			"component": "code",
+			"connections": {
+				"output": [
+					{
+						"id": "im4cptzcz",
+						"index": "payload"
+					}
+				]
+			},
+			"outputs": [
+				{
+					"id": "output",
+					"name": "Output #1"
+				}
+			]
+		},
+		"im4cptzcz": {
+			"id": "im4cptzcz",
+			"config": {
+				"url": "https://192.168.1.29:1337/process",
+				"method": "POST",
+				"dnscache": true,
+				"insecure": true,
+				"secret": "",
+				"nocookies": true,
+				"xhr": false,
+				"parse": true,
+				"timeout": 10000,
+				"limit": 512000,
+				"responsebody": true,
+				"headers": {},
+				"cookies": {},
+				"serialize": "buffer",
+				"send": "all"
+			},
+			"x": 1216,
+			"y": 606,
+			"note": "Handles the payload from code component",
+			"component": "request",
+			"connections": {
+				"response": [
+					{
+						"id": "im4cpu8aa",
+						"index": "input"
+					}
+				],
+				"error": [
+					{
+						"id": "im4cpumhm",
+						"index": "input"
+					}
+				]
+			}
+		},
+		"im4cpu8aa": {
+			"id": "im4cpu8aa",
+			"config": {
+				"repo": false,
+				"data": true
+			},
+			"x": 1594,
+			"y": 459,
+			"component": "print",
+			"connections": {}
+		},
+		"im4cpumhm": {
+			"id": "im4cpumhm",
+			"config": {
+				"repo": false,
+				"data": true
+			},
+			"x": 1599,
+			"y": 839,
+			"component": "print",
+			"connections": {}
+		}
+	},
+	"sources": {}
+}

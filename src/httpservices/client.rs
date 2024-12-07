@@ -29,9 +29,6 @@ pub async fn fetch_url(url: hyper::Uri) -> Result<(), Box<dyn std::error::Error 
 
     let mut res = sender.send_request(req).await?;
 
-    println!("Response: {}", res.status());
-    println!("Headers: {:#?}\n", res.headers());
-
     // Stream the body, writing each chunk to stdout as we get it
     // (instead of buffering and printing at the end).
     while let Some(next) = res.frame().await {
@@ -40,8 +37,5 @@ pub async fn fetch_url(url: hyper::Uri) -> Result<(), Box<dyn std::error::Error 
             io::stdout().write_all(&chunk).await?;
         }
     }
-
-    println!("\n\nDone!");
-
     Ok(())
 }

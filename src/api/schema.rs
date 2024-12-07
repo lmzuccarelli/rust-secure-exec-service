@@ -72,92 +72,8 @@ pub enum Commands {
     },
 }
 
-#[derive(Serialize, Deserialize)]
-pub struct BaseConfig {
-    #[serde(rename = "created")]
-    created: String,
-
-    #[serde(rename = "architecture")]
-    architecture: String,
-
-    #[serde(rename = "os")]
-    os: String,
-
-    #[serde(rename = "config")]
-    config: Config,
-
-    #[serde(rename = "rootfs")]
-    rootfs: Rootfs,
-}
-
-#[derive(Serialize, Deserialize)]
-pub struct Config {
-    #[serde(rename = "Env")]
-    env: Vec<String>,
-
-    #[serde(rename = "Cmd")]
-    cmd: Vec<String>,
-
-    #[serde(rename = "Labels")]
-    labels: Labels,
-}
-
-#[derive(Serialize, Deserialize)]
-pub struct Labels {
-    #[serde(rename = "architecture")]
-    architecture: String,
-
-    #[serde(rename = "build-date")]
-    build_date: String,
-
-    #[serde(rename = "component")]
-    component: String,
-
-    #[serde(rename = "description")]
-    description: String,
-
-    #[serde(rename = "distribution-scope")]
-    distribution_scope: String,
-
-    #[serde(rename = "maintainer")]
-    maintainer: String,
-
-    #[serde(rename = "name")]
-    name: String,
-
-    #[serde(rename = "release")]
-    release: String,
-
-    #[serde(rename = "summary")]
-    summary: String,
-
-    #[serde(rename = "url")]
-    url: String,
-
-    #[serde(rename = "vcs-ref")]
-    vcs_ref: String,
-
-    #[serde(rename = "vcs-type")]
-    vcs_type: String,
-
-    #[serde(rename = "vendor")]
-    vendor: String,
-
-    #[serde(rename = "version")]
-    version: String,
-}
-
-#[derive(Serialize, Deserialize)]
-pub struct Rootfs {
-    #[serde(rename = "type")]
-    rootfs_type: String,
-
-    #[serde(rename = "diff_ids")]
-    diff_ids: Vec<String>,
-}
-
 #[derive(Serialize, Deserialize, Debug)]
-pub struct MicroserviceConfig {
+pub struct TaskExecute {
     #[serde(rename = "apiVersion")]
     api_version: String,
 
@@ -170,57 +86,23 @@ pub struct MicroserviceConfig {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Spec {
-    #[serde(rename = "services")]
-    pub services: Vec<Service>,
+    #[serde(rename = "nodes")]
+    pub nodes: Vec<NodeExecute>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct Service {
-    /// name must correspond to the actual binary that was created
+pub struct NodeExecute {
     #[serde(rename = "name")]
     pub name: String,
 
-    /// binary_path is the path to the actual microservice project on disk
-    /// and the link to the binary
-    #[serde(rename = "binaryPath")]
-    pub binary_path: String,
-
-    /// registry is the oci registry to pull the image from
-    #[serde(rename = "registry")]
-    pub registry: String,
-
-    #[serde(rename = "version")]
-    pub version: String,
-
-    #[serde(rename = "authors")]
-    pub authors: Vec<String>,
-
-    #[serde(rename = "description")]
-    pub description: String,
-
-    #[serde(rename = "env")]
-    pub env: Option<Vec<KeyValue>>,
-
-    #[serde(rename = "args")]
-    pub args: Option<Vec<KeyValue>>,
+    #[serde(rename = "parameters")]
+    pub parameters: Parameters,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct KeyValue {
-    #[serde(rename = "name")]
-    pub name: String,
-
-    #[serde(rename = "value")]
-    pub value: String,
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-pub struct APIParameters {
+pub struct Parameters {
     #[serde(rename = "command")]
     pub command: String,
-
-    #[serde(rename = "node")]
-    pub node: String,
 
     #[serde(rename = "user")]
     pub user: String,
@@ -230,6 +112,12 @@ pub struct APIParameters {
 
     #[serde(rename = "callbackUrl")]
     pub callback_url: Option<String>,
+
+    #[serde(rename = "errorUrl")]
+    pub error_url: String,
+
+    #[serde(rename = "consoleLog")]
+    pub console_log: bool,
 }
 
 #[derive(Serialize, Deserialize, Debug)]

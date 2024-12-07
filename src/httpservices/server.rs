@@ -1,4 +1,4 @@
-use crate::api::schema::APIParameters;
+use crate::api::schema::TaskExecute;
 use crate::command::process::{local_execute, remote_execute};
 use http::{Method, Request, Response, StatusCode};
 use http_body_util::{BodyExt, Full};
@@ -85,24 +85,28 @@ async fn process(req: Request<Incoming>) -> Result<Response<Full<Bytes>>, hyper:
             if Path::new("semaphore.pid").exists() {
                 *response.body_mut() = Full::from("process has not completed yet");
             } else {
-                // acquire
-                fs::write("semaphore.pid", "process").expect("should write semaphore");
                 let req_data = req.into_body().collect().await?.to_bytes();
                 let s = String::from_utf8(req_data.to_vec()).unwrap();
-                let api_params: APIParameters = serde_json::from_str(&s).unwrap();
-                *response.body_mut() = Full::from("process command sent please view console logs");
-                if api_params.node == "localhost" {
-                    tokio::spawn(async move {
-                        local_execute(api_params).await;
-                    });
-                } else {
-                    tokio::spawn(async move {
-                        remote_execute(api_params).await;
-                    });
+                let task_exec: TaskExecute = serde_json::from_str(&s).unwrap();
+                *response.body_mut() = Full::from("process command sent");
+                // acquire
+                fs::write("semaphore.pid", "process").expect("should write semaphore");
+                for node in task_exec.spec.nodes.iter().to_owned() {
+                    if node.name == "localhost" {
+                        let node_params = node.clone();
+                        tokio::spawn(async move {
+                            local_execute(&node_params).await;
+                        });
+                    } else {
+                        let node_params = node.clone();
+                        tokio::spawn(async move {
+                            let _ = remote_execute(&node_params).await;
+                        });
+                    }
                 }
             }
         }
-        // Catch-all 404.
+        // not found
         _ => {
             *response.status_mut() = StatusCode::NOT_FOUND;
         }
@@ -110,24 +114,18 @@ async fn process(req: Request<Incoming>) -> Result<Response<Full<Bytes>>, hyper:
     Ok(response)
 }
 
-// Load public certificate from file.
+// load public certificate from file.
 fn load_certs(filename: &str) -> io::Result<Vec<CertificateDer<'static>>> {
-    // Open certificate file.
     let certfile = fs::File::open(filename)
         .map_err(|e| error(format!("failed to open {}: {}", filename, e)))?;
     let mut reader = io::BufReader::new(certfile);
-
-    // Load and return certificate.
     rustls_pemfile::certs(&mut reader).collect()
 }
 
-// Load private key from file.
+// load private key from file.
 fn load_private_key(filename: &str) -> io::Result<PrivateKeyDer<'static>> {
-    // Open keyfile.
     let keyfile = fs::File::open(filename)
         .map_err(|e| error(format!("failed to open {}: {}", filename, e)))?;
     let mut reader = io::BufReader::new(keyfile);
-
-    // Load and return a single private key.
     rustls_pemfile::private_key(&mut reader).map(|key| key.unwrap())
 }

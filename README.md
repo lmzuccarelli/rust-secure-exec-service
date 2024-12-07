@@ -2,12 +2,16 @@
 
 A simple https (secure) command service with http callback 
 
-## Clone this repo
+## Clone and build
 
 ```
 git clone https://github.com/lmzuccarelli/rust-secure-exec-service
 
 cd rust-secure-exec-service
+
+# this assumes you have installed Rust and build essentials
+
+make build
 ```
 
 ## TLS cert creation
