@@ -14,7 +14,18 @@ cd rust-secure-exec-service
 make build
 ```
 
+## GUI Front End (Optional)
+
+Refer to the project [totaljs](https://www.totaljs.com/)
+
+Create your desired flow and point the HTTP Request service/object to this service
+
+You can also use the provided metadat schemas in this repo under the folder total-js-flow
+
+
 ## TLS cert creation
+
+Create the private/public key pair and store them in a folder in this directory called ./certs
 
 create a CA authority (self signed)
 
