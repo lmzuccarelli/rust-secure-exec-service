@@ -1,5 +1,5 @@
-use crate::api::schema::TaskExecute;
-use crate::command::process::{local_execute, remote_execute};
+use crate::api::schema::{FileUpload, TaskExecute};
+use crate::command::process::{execute, remote_upload};
 use http::{Method, Request, Response, StatusCode};
 use http_body_util::{BodyExt, Full};
 use hyper::body::{Bytes, Incoming};
@@ -79,7 +79,21 @@ async fn process(req: Request<Incoming>) -> Result<Response<Full<Bytes>>, hyper:
         (&Method::GET, "/") => {
             *response.body_mut() = Full::from("use POST to '/process' endpoint\n");
         }
-        // service route.
+        // file upload service route.
+        (&Method::POST, "/upload") => {
+            // simple file based semaphore - dropped when callback is completed
+            if Path::new("semaphore.pid").exists() {
+                *response.body_mut() = Full::from("file upload has not completed yet");
+            } else {
+                let req_data = req.into_body().collect().await?.to_bytes();
+                let s = String::from_utf8(req_data.to_vec()).unwrap();
+                let file_upload: FileUpload = serde_json::from_str(&s).unwrap();
+                *response.body_mut() = Full::from("file upload executing");
+                let nodes = file_upload.clone();
+                let _handle = tokio::spawn(async move { remote_upload(&nodes).await });
+            }
+        }
+        // process command service route.
         (&Method::POST, "/process") => {
             // simple file based semaphore - dropped when callback is completed
             if Path::new("semaphore.pid").exists() {
@@ -90,20 +104,8 @@ async fn process(req: Request<Incoming>) -> Result<Response<Full<Bytes>>, hyper:
                 let task_exec: TaskExecute = serde_json::from_str(&s).unwrap();
                 *response.body_mut() = Full::from("process command sent");
                 // acquire
-                fs::write("semaphore.pid", "process").expect("should write semaphore");
-                for node in task_exec.spec.nodes.iter().to_owned() {
-                    if node.name == "localhost" {
-                        let node_params = node.clone();
-                        tokio::spawn(async move {
-                            local_execute(&node_params).await;
-                        });
-                    } else {
-                        let node_params = node.clone();
-                        tokio::spawn(async move {
-                            let _ = remote_execute(&node_params).await;
-                        });
-                    }
-                }
+                let tasks = task_exec.clone();
+                let _handle = tokio::spawn(async move { execute(&tasks).await });
             }
         }
         // not found

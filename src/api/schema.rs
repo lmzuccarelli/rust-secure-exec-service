@@ -72,7 +72,52 @@ pub enum Commands {
     },
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct FileUpload {
+    #[serde(rename = "apiVersion")]
+    api_version: String,
+
+    #[serde(rename = "kind")]
+    kind: String,
+
+    #[serde(rename = "spec")]
+    pub spec: FileSpec,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct FileSpec {
+    #[serde(rename = "nodes")]
+    pub nodes: Vec<FileNodeUpload>,
+
+    #[serde(rename = "callback")]
+    pub callback: bool,
+
+    #[serde(rename = "callbackUrl")]
+    pub callback_url: Option<String>,
+
+    #[serde(rename = "errorUrl")]
+    pub error_url: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct FileNodeUpload {
+    #[serde(rename = "user")]
+    pub user: String,
+
+    #[serde(rename = "name")]
+    pub name: String,
+
+    #[serde(rename = "path")]
+    pub path: String,
+
+    #[serde(rename = "file")]
+    pub file: String,
+
+    #[serde(rename = "mode")]
+    pub mode: String,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct TaskExecute {
     #[serde(rename = "apiVersion")]
     api_version: String,
@@ -84,10 +129,19 @@ pub struct TaskExecute {
     pub spec: Spec,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Spec {
     #[serde(rename = "nodes")]
     pub nodes: Vec<NodeExecute>,
+
+    #[serde(rename = "callback")]
+    pub callback: bool,
+
+    #[serde(rename = "callbackUrl")]
+    pub callback_url: Option<String>,
+
+    #[serde(rename = "errorUrl")]
+    pub error_url: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -104,17 +158,11 @@ pub struct Parameters {
     #[serde(rename = "command")]
     pub command: String,
 
+    #[serde(rename = "args")]
+    pub args: Option<Vec<String>>,
+
     #[serde(rename = "user")]
     pub user: String,
-
-    #[serde(rename = "callback")]
-    pub callback: bool,
-
-    #[serde(rename = "callbackUrl")]
-    pub callback_url: Option<String>,
-
-    #[serde(rename = "errorUrl")]
-    pub error_url: String,
 
     #[serde(rename = "consoleLog")]
     pub console_log: bool,

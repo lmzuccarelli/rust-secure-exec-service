@@ -1,0 +1,19 @@
+ {
+  "apiVersion": "task-execute.application.io/v1alpha1",
+  "kind": "FileUpload",
+  "spec": {
+    "nodes": [
+      {
+        "name": "192.168.1.35:22",
+    			 "user": "lzuccarelli",
+    			 "file": "/home/lzuccarelli/Projects/rust-image-mirror/target/release/image-mirror",
+    			 "path": "/home/lzuccarelli/Projects/image-mirror",
+    			 "mode": "0755"
+			   }
+		  ],
+    "callback": true,
+    "callbackUrl": "http://192.168.1.29:8000/deploy/notify",
+    "consoleLog": true,
+    "errorUrl": "http://192.168.1.29:8000/deploy/error"
+	 }
+}

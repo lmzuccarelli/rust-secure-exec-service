@@ -8,12 +8,12 @@
        	"parameters": {
     			"command": "./scripts/disk-to-mirror.sh",
     			"user": "lzuccarelli",
-    			"callback": true,
-    			"callbackUrl": "http://192.168.1.27:8000/mirror/notify",
-					"consoleLog": true,
-					"errorUrl": "http://192.168.1.27:8000/mirror/error"
+					"consoleLog": true
 				}
 			}
-		]
+		],
+    "callback": true,
+   	"callbackUrl": "http://192.168.1.27:8000/mirror/notify",
+		"errorUrl": "http://192.168.1.27:8000/mirror/error"
 	}
 }

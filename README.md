@@ -20,7 +20,7 @@ Refer to the project [totaljs](https://www.totaljs.com/)
 
 Create your desired flow and point the HTTP Request service/object to this service
 
-You can also use the provided metadat schemas in this repo under the folder total-js-flow
+You can also use the provided metadata schemas in this repo under the folder total-js-flow
 
 
 ## TLS cert creation

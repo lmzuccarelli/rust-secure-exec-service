@@ -1,0 +1,19 @@
+ {
+  "apiVersion": "task-execute.application.io/v1alpha1",
+  "kind": "TaskExecute",
+  "spec": {
+    "nodes": [
+      {
+        "name": "192.168.1.35:22",
+        "parameters": {
+    			   "command": "./scripts/create-dirs.sh",
+    			   "user": "lzuccarelli",
+    			   "consoleLog": true
+    			 }
+    		}
+    ],
+    "callback": true,
+    "callbackUrl": "http://192.168.1.27:8000/deploy/notify",
+    "errorUrl": "http://192.168.1.27:8000/deploy/error"
+	 }
+}

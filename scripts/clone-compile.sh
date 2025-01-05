@@ -2,13 +2,18 @@
 #
 set -exv 
 
+GIT_USER=$1
+REPO=$2
+
+echo -e "${GIT_USER} ${REPO}"
+
 cd ~/Projects
 
-rm -rf rust-image-mirror
+rm -rf ${REPO}
 
-git clone https://github.com/lmzuccarelli/rust-image-mirror
+git clone https://github.com/${GIT_USER}/${REPO}
 
-cd rust-image-mirror
+cd $REPO
 
 make build
 
