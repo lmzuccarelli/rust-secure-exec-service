@@ -133,7 +133,20 @@ pub async fn remote_upload(file_upload: &FileUpload) -> Result<(), TaskExecuteEr
         // read local file
         let mut file_buf = vec![];
         let res_file = File::open(node.file.clone());
-        let res_r = res_file.unwrap().read_to_end(&mut file_buf).unwrap();
+        let res_r = res_file.unwrap().read_to_end(&mut file_buf);
+        if res_r.is_err() {
+            fs::remove_file("semaphore.pid").expect("should delete semaphore");
+            if file_upload.spec.callback {
+                let url_str = &file_upload.spec.error_url;
+                let uri = hyper::Uri::from_str(url_str.as_ref().unwrap()).unwrap();
+                let _res = fetch_url(uri).await;
+            }
+            let err = TaskExecuteError::new(&format!(
+                "[remote_upload] failed: {}",
+                res_r.err().unwrap().to_string().to_lowercase()
+            ));
+            return Err(err);
+        }
 
         let mode = match node.mode.as_str() {
             "0755" => 0o755,
@@ -141,7 +154,7 @@ pub async fn remote_upload(file_upload: &FileUpload) -> Result<(), TaskExecuteEr
             _ => 0o644,
         };
         let mut remote_file = sess
-            .scp_send(Path::new(&node.path), mode, res_r as u64, None)
+            .scp_send(Path::new(&node.path), mode, res_r.unwrap() as u64, None)
             .unwrap();
         let res = remote_file.write_all(&file_buf.clone());
         if res.is_err() {
