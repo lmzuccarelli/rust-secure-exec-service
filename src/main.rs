@@ -1,4 +1,5 @@
 use crate::httpservices::server::run_server;
+use custom_logger as log;
 use std::fs;
 use std::path::Path;
 
@@ -10,6 +11,12 @@ mod httpservices;
 #[tokio::main]
 async fn main() {
     let _ = fs::create_dir_all("logs");
+
+    // setup logging
+    log::Logging::new()
+        .with_level(log::LevelFilter::Info)
+        .init()
+        .expect("should initialize");
 
     // clean up semaphore
     if Path::new("semaphore.pid").exists() {

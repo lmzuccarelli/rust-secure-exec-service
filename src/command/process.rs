@@ -2,6 +2,7 @@ use crate::api::schema::FileUpload;
 use crate::api::schema::TaskExecute;
 use crate::error::handler::TaskExecuteError;
 use crate::httpservices::client::fetch_url;
+use custom_logger as log;
 use ssh2::Session;
 use std::fs;
 use std::fs::File;
@@ -32,16 +33,14 @@ pub async fn execute(task_execute: &TaskExecute) -> Result<(), TaskExecuteError>
             let exit_status = channel.exit_status().unwrap();
             if exit_status != 0 {
                 fs::remove_file("semaphore.pid").expect("should delete semaphore");
-                if task_execute.spec.callback {
-                    let url_str = &task_execute.spec.error_url;
-                    let uri = hyper::Uri::from_str(url_str.as_ref().unwrap()).unwrap();
-                    let _res = fetch_url(uri).await;
-                }
+                let url_str = &task_execute.spec.error_url;
+                let uri = hyper::Uri::from_str(url_str.as_ref().unwrap()).unwrap();
+                let _res = fetch_url(uri).await;
                 let err = TaskExecuteError::new(&format!(
                     "[execute] (remote) command failed: {} status: {}",
                     node.parameters.command, exit_status,
                 ));
-                println!("[execute] (remote) error {:?}", err);
+                log::error!("[execute] (remote) {:?}", err);
                 return Err(err);
             }
             if node.parameters.console_log {
@@ -60,21 +59,20 @@ pub async fn execute(task_execute: &TaskExecute) -> Result<(), TaskExecuteError>
             let cmd_res = command.stdout(Stdio::piped()).spawn();
             if cmd_res.is_err() {
                 fs::remove_file("semaphore.pid").expect("should delete semaphore");
-                if task_execute.spec.callback {
-                    let url_str = &task_execute.spec.error_url;
-                    let uri = hyper::Uri::from_str(url_str.as_ref().unwrap()).unwrap();
-                    let _res = fetch_url(uri).await;
-                }
+                let url_str = &task_execute.spec.error_url;
+                let uri = hyper::Uri::from_str(url_str.as_ref().unwrap()).unwrap();
+                let _res = fetch_url(uri).await;
                 let err = TaskExecuteError::new(&format!(
                     "[execute] command failed : {}",
                     cmd_res.err().unwrap().to_string().to_lowercase()
                 ));
-                println!("[execute] error {:?}", err);
+                log::error!("[execute] {:?}", err);
                 return Err(err);
             }
             let mut out = cmd_res.unwrap().stdout.unwrap();
             let mut reader = BufReader::new(&mut out);
             if node.parameters.console_log {
+                // we uase println and not custom_logger to preserve original output
                 loop {
                     let mut line = String::new();
                     let num_bytes = reader.read_line(&mut line).unwrap();
@@ -95,16 +93,14 @@ pub async fn execute(task_execute: &TaskExecute) -> Result<(), TaskExecuteError>
             }
             if !exit_status {
                 fs::remove_file("semaphore.pid").expect("should delete semaphore");
-                if task_execute.spec.callback {
-                    let url_str = &task_execute.spec.error_url;
-                    let uri = hyper::Uri::from_str(url_str.as_ref().unwrap()).unwrap();
-                    let _res = fetch_url(uri).await;
-                }
+                let url_str = &task_execute.spec.error_url;
+                let uri = hyper::Uri::from_str(url_str.as_ref().unwrap()).unwrap();
+                let _res = fetch_url(uri).await;
                 let err = TaskExecuteError::new(&format!(
                     "[local_execute] command failed : {} status: {}",
                     node.parameters.command, exit_status
                 ));
-                println!("[execute] error {:?}", err);
+                log::error!("[execute] {:?}", err);
                 return Err(err);
             }
         }
@@ -136,11 +132,9 @@ pub async fn remote_upload(file_upload: &FileUpload) -> Result<(), TaskExecuteEr
         let res_r = res_file.unwrap().read_to_end(&mut file_buf);
         if res_r.is_err() {
             fs::remove_file("semaphore.pid").expect("should delete semaphore");
-            if file_upload.spec.callback {
-                let url_str = &file_upload.spec.error_url;
-                let uri = hyper::Uri::from_str(url_str.as_ref().unwrap()).unwrap();
-                let _res = fetch_url(uri).await;
-            }
+            let url_str = &file_upload.spec.error_url;
+            let uri = hyper::Uri::from_str(url_str.as_ref().unwrap()).unwrap();
+            let _res = fetch_url(uri).await;
             let err = TaskExecuteError::new(&format!(
                 "[remote_upload] failed: {}",
                 res_r.err().unwrap().to_string().to_lowercase()
@@ -159,11 +153,9 @@ pub async fn remote_upload(file_upload: &FileUpload) -> Result<(), TaskExecuteEr
         let res = remote_file.write_all(&file_buf.clone());
         if res.is_err() {
             fs::remove_file("semaphore.pid").expect("should delete semaphore");
-            if file_upload.spec.callback {
-                let url_str = &file_upload.spec.error_url;
-                let uri = hyper::Uri::from_str(url_str.as_ref().unwrap()).unwrap();
-                let _res = fetch_url(uri).await;
-            }
+            let url_str = &file_upload.spec.error_url;
+            let uri = hyper::Uri::from_str(url_str.as_ref().unwrap()).unwrap();
+            let _res = fetch_url(uri).await;
             let err = TaskExecuteError::new(&format!(
                 "[remote_upload] failed: {}",
                 res.err().unwrap().to_string().to_lowercase()

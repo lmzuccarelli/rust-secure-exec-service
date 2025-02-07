@@ -6,14 +6,14 @@
       {
         "name": "localhost",
        	"parameters": {
-    			"command": "./scripts/disk-to-mirror.sh",
+    			"command": "./scripts/delete-generate.sh",
     			"user": "lzuccarelli",
 					"consoleLog": true
 				}
 			}
 		],
     "callback": true,
-   	"callbackUrl": "http://192.168.1.29:8000/mirror/m2m",
+   	"callbackUrl": "http://192.168.1.29:8000/mirror/delete",
 		"errorUrl": "http://192.168.1.29:8000/mirror/error"
 	}
 }

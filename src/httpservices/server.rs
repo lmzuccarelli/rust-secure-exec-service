@@ -1,5 +1,6 @@
 use crate::api::schema::{FileUpload, TaskExecute};
 use crate::command::process::{execute, remote_upload};
+use custom_logger as log;
 use http::{Method, Request, Response, StatusCode};
 use http_body_util::{BodyExt, Full};
 use hyper::body::{Bytes, Incoming};
@@ -33,7 +34,7 @@ pub async fn run_server() -> Result<(), Box<dyn std::error::Error + Send + Sync>
     // Load private key.
     let key = load_private_key("certs/ssl.key")?;
 
-    println!("starting to serve on https://{}", addr);
+    log::info!("starting to serve on https://{}", addr);
 
     // Create a TCP listener via tokio.
     let incoming = TcpListener::bind(&addr).await?;
@@ -56,7 +57,7 @@ pub async fn run_server() -> Result<(), Box<dyn std::error::Error + Send + Sync>
             let tls_stream = match tls_acceptor.accept(tcp_stream).await {
                 Ok(tls_stream) => tls_stream,
                 Err(err) => {
-                    eprintln!("failed to perform tls handshake: {err:#}");
+                    log::error!("failed to perform tls handshake: {err:#}");
                     return;
                 }
             };
@@ -64,7 +65,7 @@ pub async fn run_server() -> Result<(), Box<dyn std::error::Error + Send + Sync>
                 .serve_connection(TokioIo::new(tls_stream), service)
                 .await
             {
-                eprintln!("failed to serve connection: {err:#}");
+                log::error!("failed to serve connection: {err:#}");
             }
         });
     }
@@ -76,8 +77,28 @@ async fn process(req: Request<Incoming>) -> Result<Response<Full<Bytes>>, hyper:
     let mut response = Response::new(Full::default());
     match (req.method(), req.uri().path()) {
         // help route.
-        (&Method::GET, "/") => {
-            *response.body_mut() = Full::from("use POST to '/process' endpoint\n");
+        (&Method::GET, "/fileprocess") => {
+            let param = req.uri().query().unwrap();
+            let res = fs::read_to_string(&param);
+            match res {
+                Ok(contents) => {
+                    *response.status_mut() = StatusCode::OK;
+                    if Path::new("semaphore.pid").exists() {
+                        *response.body_mut() = Full::from("file upload has not completed yet");
+                    } else {
+                        let task_exec: TaskExecute = serde_json::from_str(&contents).unwrap();
+                        *response.body_mut() = Full::from("process command sent");
+                        // acquire
+                        let tasks = task_exec.clone();
+                        let _handle = tokio::spawn(async move { execute(&tasks).await });
+                    }
+                }
+                Err(err) => {
+                    println!("kaka poofie");
+                    *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
+                    *response.body_mut() = Full::from(err.to_string());
+                }
+            }
         }
         // file upload service route.
         (&Method::POST, "/upload") => {

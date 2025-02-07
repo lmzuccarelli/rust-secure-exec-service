@@ -4,14 +4,22 @@ set -exv
 
 GIT_USER=$1
 REPO=$2
+BRANCH="${3:-main}"
+CLEAN="${4:-false}"
 
 echo -e "${GIT_USER} ${REPO}"
 
 cd ~/Projects
 
-rm -rf ${REPO}
+if [ "${CLEAN}" == "true"];
+then
+  rm -rf ${REPO}
+fi
 
-git clone https://github.com/${GIT_USER}/${REPO}
+if [ ! -d ${REPO} ];
+then
+  git clone -b ${BRANCH} https://github.com/${GIT_USER}/${REPO}
+fi
 
 cd $REPO
 

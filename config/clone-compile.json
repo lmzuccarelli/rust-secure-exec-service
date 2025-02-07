@@ -6,15 +6,15 @@
       {
         "name": "localhost",
         "parameters": {
-    			   "command": "./scripts/clone-compile.sh",
-    			   "args" : ["lmzuccarelli","rust-image-mirror"],
-    			   "user": "lzuccarelli",
+    		  "command": "./scripts/clone-compile.sh",
+    			"args" : ["openshift","oc-mirror"],
+    			"user": "lzuccarelli",
           "consoleLog": true
-    		  }
     		}
+    	}
     ],
     "callback": true,
-    "callbackUrl": "http://192.168.1.29:8000/deploy/notify",
-    "errorUrl": "http://192.168.1.29:8000/deploy/error"
-	}
+    "callbackUrl": "http://192.168.1.29:8000/mirror/m2d",
+    "errorUrl": "http://192.168.1.29:8000/mirror/error"
+  }
 }

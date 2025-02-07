@@ -1,0 +1,45 @@
+{
+  "apiVersion": "task-execute.application.io/v1alpha1",
+  "kind": "TaskExecute",
+  "spec": {
+    "nodes": [
+			{
+        "name": "192.168.1.45:22",
+        "parameters": {
+    			  "command": "./Projects/microservices/create-certs.sh",
+						"args": ["optiplex-uno","192.168.1.45"],
+						"user": "lzuccarelli",
+          	"consoleLog": true
+    		  }
+    	},
+			{
+        "name": "192.168.1.123:22",
+        "parameters": {
+    			  "command": "./Projects/microservices/create-certs.sh",
+						"args": ["optiplex-due","192.168.1.123"],
+						"user": "lzuccarelli",
+          	"consoleLog": true
+    		  }
+    	},
+      {
+        "name": "192.168.1.45:22",
+        "parameters": {
+    			  "command": "cd ~/Projects/microservices && ./hypertls-microservice &",
+						"user": "lzuccarelli",
+          	"consoleLog": true
+    		  }
+    	},
+			{
+        "name": "192.168.1.123:22",
+        "parameters": {
+    			  "command": "cd ~/Projects/microservices && ./hypertls-microservice &",
+						"user": "lzuccarelli",
+          	"consoleLog": true
+    		  }
+    	}
+    ],
+    "callback": true,
+    "callbackUrl": "http://192.168.1.29:8000/manage/notify",
+    "errorUrl": "http://192.168.1.29:8000/manage/error"
+	}
+}

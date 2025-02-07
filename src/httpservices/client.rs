@@ -1,4 +1,5 @@
 use bytes::Bytes;
+use custom_logger as log;
 use http_body_util::{BodyExt, Empty};
 use hyper::Request;
 use hyper_util::rt::TokioIo;
@@ -15,7 +16,7 @@ pub async fn fetch_url(url: hyper::Uri) -> Result<(), Box<dyn std::error::Error 
     let (mut sender, conn) = hyper::client::conn::http1::handshake(io).await?;
     tokio::task::spawn(async move {
         if let Err(err) = conn.await {
-            println!("Connection failed: {:?}", err);
+            log::error!("Connection failed: {:?}", err);
         }
     });
 

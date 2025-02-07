@@ -1,68 +1,68 @@
  {
-  "apiVersion": "file-upload.application.io/v1alpha1",
-  "kind": "FileUpload",
-  "spec": {
-    "nodes": [
-		    {
-    		  "name": "192.168.1.45:22",
-    		  "user": "lzuccarelli",
-    		  "file": "/home/lzuccarelli/Projects/rust-hypertls-microservice/target/release/hypertls-microservice",
-    		  "path": "/home/lzuccarelli/Projects/hypertls-microservice",
-    		  "mode": "0755"
-		    },
-		    {
-    		  "name": "192.168.1.123:22",
-    		  "user": "lzuccarelli",
-    		  "file": "/home/lzuccarelli/Projects/rust-hypertls-microservice/target/release/hypertls-microservice",
-    		  "path": "/home/lzuccarelli/Projects/hypertls-microservice",
-    		  "mode": "0755"
-		    },
-		    {
-    		  "name": "192.168.1.169:22",
-    		  "user": "lzuccarelli",
-    		  "file": "/home/lzuccarelli/Projects/convey/target/release/convey",
-    		  "path": "/home/lzuccarelli/Projects/convey",
-    		  "mode": "0755"
-		    },
-		    {
-    		  "name": "192.168.1.186:22",
-    		  "user": "lzuccarelli",
-    		  "file": "/home/lzuccarelli/Projects/convey/target/release/convey",
-    		  "path": "/home/lzuccarelli/Projects/convey",
-    		  "mode": "0755"
-		    },
-		    {
-    		  "name": "192.168.1.169:22",
-    		  "user": "lzuccarelli",
-    		  "file": "/home/lzuccarelli/Projects/convey/lb-setup.toml",
-    		  "path": "/home/lzuccarelli/Projects/lb-config.toml",
-    		  "mode": "0755"
-		    },
-		    {
-    		  "name": "192.168.1.186:22",
-    		  "user": "lzuccarelli",
-    		  "file": "/home/lzuccarelli/Projects/convey/lb-setup.toml",
-    		  "path": "/home/lzuccarelli/Projects/lb-config.toml",
-    		  "mode": "06755"
-		    },
-      {
-    		  "name": "192.168.1.169:22",
-    		  "user": "lzuccarelli",
-    		  "file": "/home/lzuccarelli/Projects/keepalived/keepalived-master.conf",
-    		  "path": "/home/lzuccarelli/Projects/keepalived.conf",
-    		  "mode": "0755"
-		    },
-      {
-    		  "name": "192.168.1.169:22",
-    		  "user": "lzuccarelli",
-    		  "file": "/home/lzuccarelli/Projects/keepalived/keepalived-backup.conf",
-    		  "path": "/home/lzuccarelli/Projects/keepalived.conf",
-    		  "mode": "0755"
-		    }
-		  ],
-    "callback": true,
-    "callbackUrl": "http://192.168.1.29:8000/deploy/complete",
-    "consoleLog": true,
-    "errorUrl": "http://192.168.1.29:8000/deploy/error"
-  }
+   "apiVersion":"file-upload.application.io/v1alpha1",
+   "kind":"FileUpload",
+   "spec":{
+      "nodes":[
+         {
+            "name":"192.168.1.45:22",
+            "user":"lzuccarelli",
+            "file":"/home/lzuccarelli/Projects/rust-hypertls-microservice/target/release/hypertls-microservice",
+            "path":"/home/lzuccarelli/Projects/hypertls-microservice",
+            "mode":"0755"
+         },
+         {
+            "name":"192.168.1.123:22",
+            "user":"lzuccarelli",
+            "file":"/home/lzuccarelli/Projects/rust-hypertls-microservice/target/release/hypertls-microservice",
+            "path":"/home/lzuccarelli/Projects/hypertls-microservice",
+            "mode":"0755"
+         },
+         {
+            "name":"192.168.1.169:22",
+            "user":"lzuccarelli",
+            "file":"/home/lzuccarelli/Projects/convey/target/release/convey",
+            "path":"/home/lzuccarelli/Projects/convey",
+            "mode":"0755"
+         },
+         {
+            "name":"192.168.1.186:22",
+            "user":"lzuccarelli",
+            "file":"/home/lzuccarelli/Projects/convey/target/release/convey",
+            "path":"/home/lzuccarelli/Projects/convey",
+            "mode":"0755"
+         },
+         {
+            "name":"192.168.1.169:22",
+            "user":"lzuccarelli",
+            "file":"/home/lzuccarelli/Projects/convey/lb-setup.toml",
+            "path":"/home/lzuccarelli/Projects/lb-config.toml",
+            "mode":"0755"
+         },
+         {
+            "name":"192.168.1.186:22",
+            "user":"lzuccarelli",
+            "file":"/home/lzuccarelli/Projects/convey/lb-setup.toml",
+            "path":"/home/lzuccarelli/Projects/lb-config.toml",
+            "mode":"06755"
+         },
+         {
+            "name":"192.168.1.169:22",
+            "user":"lzuccarelli",
+            "file":"/home/lzuccarelli/Projects/keepalived/keepalived-master.conf",
+            "path":"/home/lzuccarelli/Projects/keepalived.conf",
+            "mode":"0755"
+         },
+         {
+            "name":"192.168.1.169:22",
+            "user":"lzuccarelli",
+            "file":"/home/lzuccarelli/Projects/keepalived/keepalived-backup.conf",
+            "path":"/home/lzuccarelli/Projects/keepalived.conf",
+            "mode":"0755"
+         }
+      ],
+      "callback":true,
+      "callbackUrl":"http://192.168.1.29:8000/deploy/complete",
+      "consoleLog":true,
+      "errorUrl":"http://192.168.1.29:8000/deploy/error"
+   }
 }
