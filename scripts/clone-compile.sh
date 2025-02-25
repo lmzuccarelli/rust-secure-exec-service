@@ -11,7 +11,7 @@ echo -e "${GIT_USER} ${REPO}"
 
 cd ~/Projects
 
-if [ "${CLEAN}" == "true"];
+if [ "${CLEAN}" == "true" ];
 then
   rm -rf ${REPO}
 fi
